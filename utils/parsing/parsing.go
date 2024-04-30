@@ -18,3 +18,7 @@ func ReadDigits(input string) []int {
 
 	return digits
 }
+
+func ReadLines(input string) []string {
+	return strings.Split(strings.TrimSpace(input), "\n")
+}

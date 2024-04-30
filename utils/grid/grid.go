@@ -1,6 +1,9 @@
 package grid
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 type Point struct {
 	X int
@@ -47,4 +50,18 @@ func SurroundingPoints(p Point) DirectionalPoints {
 		South: Point{X: p.X, Y: p.Y + 1},
 		West:  Point{X: p.X - 1, Y: p.Y},
 	}
+}
+
+func Transpose(a [][]string) [][]string {
+	newArr := make([][]string, len(a))
+	for i := 0; i < len(a); i++ {
+		for j := 0; j < len(a[0]); j++ {
+			newArr[j] = append(newArr[j], a[i][j])
+		}
+	}
+	return newArr
+}
+
+func ManhattenDistance(p1 Point, p2 Point) int {
+	return int(math.Abs(float64(p1.X)-float64(p2.X)) + math.Abs(float64(p1.Y)-float64((p2.Y))))
 }

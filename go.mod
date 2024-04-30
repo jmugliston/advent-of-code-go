@@ -14,3 +14,5 @@ require (
 	github.com/atheius/aoc/utils v0.0.0-00010101000000-000000000000
 	github.com/juliangruber/go-intersect v1.1.0
 )
+
+require gonum.org/v1/gonum v0.15.0

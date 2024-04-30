@@ -13,7 +13,7 @@ func TestPart1(t *testing.T) {
 		panic("Couldn't find the example file!")
 	}
 
-	expected := -1
+	expected := 374
 
 	result := Part1(string(input))
 
@@ -31,9 +31,9 @@ func TestPart2(t *testing.T) {
 		panic("Couldn't find the example file!")
 	}
 
-	expected := -1
+	expected := 8410
 
-	result := Part2(string(input))
+	result := Part2(string(input), 100)
 
 	if result != expected {
 		t.Errorf("Expected %v, got %d", expected, result)
