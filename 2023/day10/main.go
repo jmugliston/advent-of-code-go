@@ -147,7 +147,7 @@ func numIntersections(row []string, rowIdx int, pipePositionsInRow []grid.Point,
 }
 
 func Part1(input string) int {
-	maze := grid.ReadGrid(input)
+	maze := grid.Parse(input)
 
 	start := findStartPosition(maze)
 
@@ -157,7 +157,7 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	maze := grid.ReadGrid(input)
+	maze := grid.Parse(input)
 
 	start := findStartPosition(maze)
 

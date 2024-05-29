@@ -99,7 +99,7 @@ func getDistances(galaxies []grid.Point) []int {
 
 func Part1(input string) int {
 
-	image := grid.ReadGrid(input)
+	image := grid.Parse(input)
 
 	galaxies := getGalaxies(image)
 
@@ -119,7 +119,7 @@ func Part1(input string) int {
 }
 
 func Part2(input string, scale int) int {
-	image := grid.ReadGrid(input)
+	image := grid.Parse(input)
 
 	galaxies := getGalaxies(image)
 

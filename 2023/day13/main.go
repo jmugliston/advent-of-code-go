@@ -30,7 +30,7 @@ func getGrids(input string) [][][]string {
 	var grids [][][]string
 
 	for _, line := range split {
-		grids = append(grids, grid.ReadGrid(line))
+		grids = append(grids, grid.Parse(line))
 	}
 
 	return grids

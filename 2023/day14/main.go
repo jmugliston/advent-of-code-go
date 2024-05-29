@@ -72,7 +72,7 @@ func calculateLoad(g grid.Grid) int {
 
 func Part1(input string) int {
 
-	rockMap := grid.ReadGrid(input)
+	rockMap := grid.Parse(input)
 
 	tilted := tiltNorth(rockMap)
 
@@ -83,7 +83,7 @@ func Part1(input string) int {
 
 func Part2(input string) int {
 
-	rockMap := grid.ReadGrid(input)
+	rockMap := grid.Parse(input)
 
 	loads := []int{}
 	cycleMap := map[int][]int{}

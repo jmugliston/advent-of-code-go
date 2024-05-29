@@ -26,15 +26,25 @@ type Point struct {
 
 type Direction int
 
+type PointWithDirection struct {
+	X         int
+	Y         int
+	Direction Direction
+}
+
 const (
 	North Direction = iota + 1
+	NorthEast
 	East
+	SouthEast
 	South
+	SouthWest
 	West
+	NorthWest
 )
 
 func (d Direction) String() string {
-	return [...]string{"North", "East", "South", "West"}[d-1]
+	return [...]string{"North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest"}[d-1]
 }
 
 func (d Direction) EnumIndex() int {
@@ -42,13 +52,17 @@ func (d Direction) EnumIndex() int {
 }
 
 type DirectionalPoints struct {
-	North Point
-	East  Point
-	South Point
-	West  Point
+	North     Point
+	NorthEast Point
+	East      Point
+	SouthEast Point
+	South     Point
+	SouthWest Point
+	West      Point
+	NorthWest Point
 }
 
-func ReadGrid(input string) Grid {
+func Parse(input string) Grid {
 	var output Grid
 	lines := strings.Split(strings.TrimSpace(input), "\n")
 	for _, line := range lines {
@@ -59,11 +73,42 @@ func ReadGrid(input string) Grid {
 
 func SurroundingPoints(p Point) DirectionalPoints {
 	return DirectionalPoints{
-		North: Point{X: p.X, Y: p.Y - 1},
-		East:  Point{X: p.X + 1, Y: p.Y},
-		South: Point{X: p.X, Y: p.Y + 1},
-		West:  Point{X: p.X - 1, Y: p.Y},
+		North:     Point{X: p.X, Y: p.Y - 1},
+		NorthEast: Point{X: p.X + 1, Y: p.Y - 1},
+		East:      Point{X: p.X + 1, Y: p.Y},
+		SouthEast: Point{X: p.X + 1, Y: p.Y + 1},
+		South:     Point{X: p.X, Y: p.Y + 1},
+		SouthWest: Point{X: p.X - 1, Y: p.Y + 1},
+		West:      Point{X: p.X - 1, Y: p.Y},
+		NorthWest: Point{X: p.X - 1, Y: p.Y - 1},
 	}
+}
+
+func GetNextPointInDirection(p PointWithDirection) Point {
+	switch p.Direction {
+	case North:
+		return Point{X: p.X, Y: p.Y - 1}
+	case NorthEast:
+		return Point{X: p.X + 1, Y: p.Y - 1}
+	case East:
+		return Point{X: p.X + 1, Y: p.Y}
+	case SouthEast:
+		return Point{X: p.X + 1, Y: p.Y + 1}
+	case South:
+		return Point{X: p.X, Y: p.Y + 1}
+	case SouthWest:
+		return Point{X: p.X - 1, Y: p.Y + 1}
+	case West:
+		return Point{X: p.X - 1, Y: p.Y}
+	case NorthWest:
+		return Point{X: p.X - 1, Y: p.Y - 1}
+	default:
+		return Point{}
+	}
+}
+
+func IsPointInGrid(p Point, g Grid) bool {
+	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
 }
 
 func Transpose(a [][]string) [][]string {
