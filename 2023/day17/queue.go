@@ -1,15 +1,11 @@
 package main
 
 import (
-	"container/heap"
-
 	"github.com/atheius/aoc/grid"
 )
 
 type QueueItem struct {
-	X int
-	Y int
-	grid.Direction
+	grid.PointWithDirection
 	Count    int
 	Heatloss int
 	Path     []grid.PointWithDirection
@@ -45,12 +41,4 @@ func (pq *PriorityQueue) Pop() any {
 	item.Index = -1 // for safety
 	*pq = old[0 : n-1]
 	return item
-}
-
-func (pq *PriorityQueue) update(item *QueueItem, p grid.PointWithDirection, heatloss int) {
-	item.X = p.X
-	item.Y = p.Y
-	item.Direction = p.Direction
-	item.Heatloss = heatloss
-	heap.Fix(pq, item.Index)
 }

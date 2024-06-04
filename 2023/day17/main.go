@@ -26,9 +26,7 @@ func main() {
 }
 
 type CruciblePoint struct {
-	X int
-	Y int
-	grid.Direction
+	grid.PointWithDirection
 	Count int
 }
 
@@ -46,13 +44,11 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 	heap.Init(&pq)
 
 	pq[0] = &QueueItem{
-		X:         start.X,
-		Y:         start.Y,
-		Direction: grid.North, // Start with any direction that is not East/South
-		Count:     minCount,
-		Heatloss:  0,
-		Path:      []grid.PointWithDirection{},
-		Index:     0,
+		PointWithDirection: grid.PointWithDirection{X: start.X, Y: start.Y, Direction: grid.North}, // Start with any direction that is not East/South
+		Count:              minCount,
+		Heatloss:           0,
+		Path:               []grid.PointWithDirection{},
+		Index:              0,
 	}
 
 	minHeatLoss := 9999999
@@ -61,7 +57,7 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 
 		nextQueueItem := heap.Pop(&pq).(*QueueItem)
 
-		visited[CruciblePoint{X: nextQueueItem.X, Y: nextQueueItem.Y, Direction: nextQueueItem.Direction, Count: nextQueueItem.Count}] = true
+		visited[CruciblePoint{PointWithDirection: nextQueueItem.PointWithDirection, Count: nextQueueItem.Count}] = true
 
 		currentStep := grid.PointWithDirection{X: nextQueueItem.X, Y: nextQueueItem.Y, Direction: nextQueueItem.Direction}
 		currentCount := nextQueueItem.Count
@@ -73,14 +69,18 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 				continue
 			}
 			minHeatLoss = currentHeatLoss
-			// minPath = currentPath
 			break
 		}
 
+	DirectionLoop:
 		for _, direction := range []grid.Direction{grid.North, grid.East, grid.South, grid.West} {
 
 			nextStep := grid.GetNextPointInDirection(grid.PointWithDirection{X: currentStep.X, Y: currentStep.Y, Direction: direction})
 			nextCount := currentCount
+
+			if !grid.IsPointInGrid(nextStep, heatLossMap) {
+				continue
+			}
 
 			if direction == currentStep.Direction {
 				nextCount += 1
@@ -96,57 +96,36 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 				nextCount = 1
 			}
 
-			// Is in grid?
-			if !grid.IsPointInGrid(nextStep, heatLossMap) {
-				continue
-			}
-
 			// Is already visited?
-			if _, ok := visited[CruciblePoint{X: nextStep.X, Y: nextStep.Y, Direction: direction, Count: nextCount}]; ok {
+			if _, ok := visited[CruciblePoint{
+				PointWithDirection: grid.PointWithDirection{X: nextStep.X, Y: nextStep.Y, Direction: direction},
+				Count:              nextCount,
+			}]; ok {
 				continue
 			}
 
 			// Don't go back
-			movingBackwards := false
 			for _, step := range currentPath {
 				if step.X == nextStep.X && step.Y == nextStep.Y {
-					movingBackwards = true
-					break
+					continue DirectionLoop
 				}
 			}
-
-			if movingBackwards {
-				continue
-			}
-
-			// Calculate heat loss
-			nextHeatLoss := currentHeatLoss + getHeatLossAtPoint(&heatLossMap, nextStep)
 
 			// Already in the queue?
-			alreadyInQueue := false
 			for _, item := range pq {
 				if item.X == nextStep.X && item.Y == nextStep.Y && item.Direction == direction && item.Count == nextCount {
-					alreadyInQueue = true
-					break
+					continue DirectionLoop
 				}
 			}
 
-			if alreadyInQueue {
-				continue
-			}
-
-			nextPath := make([]grid.PointWithDirection, len(currentPath))
-			copy(nextPath, currentPath)
+			nextPath := append([]grid.PointWithDirection(nil), currentPath...)
 			nextPath = append(nextPath, grid.PointWithDirection{X: nextStep.X, Y: nextStep.Y, Direction: direction})
 
-			// Add to queue
 			heap.Push(&pq, &QueueItem{
-				X:         nextStep.X,
-				Y:         nextStep.Y,
-				Direction: direction,
-				Count:     nextCount,
-				Path:      nextPath,
-				Heatloss:  nextHeatLoss,
+				PointWithDirection: grid.PointWithDirection{X: nextStep.X, Y: nextStep.Y, Direction: direction},
+				Count:              nextCount,
+				Path:               nextPath,
+				Heatloss:           currentHeatLoss + getHeatLossAtPoint(&heatLossMap, nextStep),
 			})
 		}
 	}
