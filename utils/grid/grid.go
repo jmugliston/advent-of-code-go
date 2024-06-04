@@ -111,8 +111,8 @@ func IsPointInGrid(p Point, g Grid) bool {
 	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
 }
 
-func Transpose(a [][]string) [][]string {
-	newArr := make([][]string, len(a[0]))
+func Transpose(a Grid) Grid {
+	newArr := make(Grid, len(a[0]))
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[0]); j++ {
 			newArr[j] = append(newArr[j], a[i][j])
@@ -121,8 +121,8 @@ func Transpose(a [][]string) [][]string {
 	return newArr
 }
 
-func RotateClockwise(a [][]string) [][]string {
-	newArr := make([][]string, len(a[0]))
+func RotateClockwise(a Grid) Grid {
+	newArr := make(Grid, len(a[0]))
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[0]); j++ {
 			newArr[j] = append(newArr[j], a[len(a)-1-i][j])
@@ -131,8 +131,8 @@ func RotateClockwise(a [][]string) [][]string {
 	return newArr
 }
 
-func RotateCounterClockwise(a [][]string) [][]string {
-	newArr := make([][]string, len(a[0]))
+func RotateCounterClockwise(a Grid) Grid {
+	newArr := make(Grid, len(a[0]))
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[0]); j++ {
 			newArr[j] = append(newArr[j], a[i][len(a[0])-1-j])
@@ -169,6 +169,25 @@ func Copy(g Grid) Grid {
 		copy(newGrid[i], g[i])
 	}
 	return newGrid
+}
+
+func PrintPath(g Grid, path []PointWithDirection) {
+	grid := Copy(g)
+
+	directionSymbols := map[Direction]string{
+		North: "^",
+		East:  ">",
+		South: "v",
+		West:  "<",
+	}
+
+	for _, step := range path {
+		if symbol, exists := directionSymbols[step.Direction]; exists {
+			grid[step.Y][step.X] = symbol
+		}
+	}
+
+	fmt.Println(grid)
 }
 
 func ToString(g Grid) string {
