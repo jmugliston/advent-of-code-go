@@ -1,23 +1,17 @@
 package grid
 
 import (
-	"fmt"
 	"math"
+	"strconv"
 	"strings"
 )
 
-type Grid [][]string
-
-func (g Grid) Format(f fmt.State, c rune) {
-	fmt.Fprintln(f, "")
-	for _, line := range g {
-		for _, char := range line {
-			fmt.Fprintf(f, "%s ", char)
-		}
-		fmt.Fprintln(f)
-	}
-	fmt.Fprintln(f, "")
+type Grid[N string | int] interface {
+	~[][]N
 }
+
+type StringGrid [][]string
+type NumberGrid [][]int
 
 type Point struct {
 	X int
@@ -62,11 +56,29 @@ type DirectionalPoints struct {
 	NorthWest Point
 }
 
-func Parse(input string) Grid {
-	var output Grid
+func Parse(input string) StringGrid {
+	var output StringGrid
 	lines := strings.Split(strings.TrimSpace(input), "\n")
 	for _, line := range lines {
-		output = append(output, strings.Split(line, ""))
+		split := strings.Split(line, "")
+		output = append(output, split)
+	}
+	return output
+}
+
+func ParseNumbers(input string) NumberGrid {
+	var output NumberGrid
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	for _, line := range lines {
+		var split []int
+		for _, char := range strings.Split(line, "") {
+			num, err := strconv.Atoi(char)
+			if err != nil {
+				panic("Can't parse grid character as number")
+			}
+			split = append(split, num)
+		}
+		output = append(output, split)
 	}
 	return output
 }
@@ -107,48 +119,15 @@ func GetNextPointInDirection(p PointWithDirection) Point {
 	}
 }
 
-func IsPointInGrid(p Point, g Grid) bool {
-	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
-}
-
-func Transpose(a Grid) Grid {
-	newArr := make(Grid, len(a[0]))
-	for i := 0; i < len(a); i++ {
-		for j := 0; j < len(a[0]); j++ {
-			newArr[j] = append(newArr[j], a[i][j])
-		}
-	}
-	return newArr
-}
-
-func RotateClockwise(a Grid) Grid {
-	newArr := make(Grid, len(a[0]))
-	for i := 0; i < len(a); i++ {
-		for j := 0; j < len(a[0]); j++ {
-			newArr[j] = append(newArr[j], a[len(a)-1-i][j])
-		}
-	}
-	return newArr
-}
-
-func RotateCounterClockwise(a Grid) Grid {
-	newArr := make(Grid, len(a[0]))
-	for i := 0; i < len(a); i++ {
-		for j := 0; j < len(a[0]); j++ {
-			newArr[j] = append(newArr[j], a[i][len(a[0])-1-j])
-		}
-	}
-	return newArr
-}
-
 func ManhattenDistance(p1 Point, p2 Point) int {
 	return int(math.Abs(float64(p1.X)-float64(p2.X)) + math.Abs(float64(p1.Y)-float64((p2.Y))))
 }
 
-func Compare(g1 Grid, g2 Grid) bool {
+func Compare[G Grid[N], N string | int](g1 G, g2 G) bool {
 	if len(g1) != len(g2) {
 		return false
 	}
+
 	for i := range g1 {
 		if len(g1[i]) != len(g2[i]) {
 			return false
@@ -159,41 +138,15 @@ func Compare(g1 Grid, g2 Grid) bool {
 			}
 		}
 	}
+
 	return true
 }
 
-func Copy(g Grid) Grid {
-	newGrid := make(Grid, len(g))
+func Copy[G Grid[N], N string | int](g G) G {
+	newGrid := make(G, len(g))
 	for i := range g {
-		newGrid[i] = make([]string, len(g[i]))
+		newGrid[i] = make([]N, len(g[i]))
 		copy(newGrid[i], g[i])
 	}
 	return newGrid
-}
-
-func PrintPath(g Grid, path []PointWithDirection) {
-	grid := Copy(g)
-
-	directionSymbols := map[Direction]string{
-		North: "^",
-		East:  ">",
-		South: "v",
-		West:  "<",
-	}
-
-	for _, step := range path {
-		if symbol, exists := directionSymbols[step.Direction]; exists {
-			grid[step.Y][step.X] = symbol
-		}
-	}
-
-	fmt.Println(grid)
-}
-
-func ToString(g Grid) string {
-	var output strings.Builder
-	for _, line := range g {
-		output.WriteString(strings.Join(line, ""))
-	}
-	return output.String()
 }

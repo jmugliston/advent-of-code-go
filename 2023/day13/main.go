@@ -24,10 +24,10 @@ func main() {
 	fmt.Println(part2Answer)
 }
 
-func getGrids(input string) [][][]string {
+func getGrids(input string) []grid.StringGrid {
 	split := strings.Split(input, "\n\n")
 
-	var grids [][][]string
+	var grids []grid.StringGrid
 
 	for _, line := range split {
 		grids = append(grids, grid.Parse(line))
@@ -85,7 +85,7 @@ func Part1(input string) int {
 		if horizontalReflectionLine != -1 {
 			result += 100 * (horizontalReflectionLine + 1)
 		} else {
-			transposedGrid := grid.Transpose(nextGrid)
+			transposedGrid := nextGrid.Transpose()
 			verticalReflectionLine := getReflectionLineAlt(transposedGrid, false)
 			result += verticalReflectionLine + 1
 		}
@@ -105,7 +105,7 @@ func Part2(input string) int {
 		if horizontalReflectionLine != -1 {
 			result += 100 * (horizontalReflectionLine + 1)
 		} else {
-			transposedGrid := grid.Transpose(nextGrid)
+			transposedGrid := nextGrid.Transpose()
 			verticalReflectionLine := getReflectionLineAlt(transposedGrid, true)
 			result += verticalReflectionLine + 1
 		}

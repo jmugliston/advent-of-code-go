@@ -15,6 +15,4 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 )
 
-require (
-	gonum.org/v1/gonum v0.15.0
-)
+require gonum.org/v1/gonum v0.15.0

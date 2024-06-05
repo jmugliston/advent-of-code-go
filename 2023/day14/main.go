@@ -24,12 +24,12 @@ func main() {
 	fmt.Println(part2Answer)
 }
 
-func tiltNorth(rockMap grid.Grid) grid.Grid {
+func tiltNorth(rockMap grid.StringGrid) grid.StringGrid {
 
 	height := len(rockMap)
 	width := len(rockMap[0])
 
-	tiltedMap := make(grid.Grid, height)
+	tiltedMap := make(grid.StringGrid, height)
 
 	for y := 0; y < height; y++ {
 		if tiltedMap[y] == nil {
@@ -54,7 +54,7 @@ func tiltNorth(rockMap grid.Grid) grid.Grid {
 	return tiltedMap
 }
 
-func calculateLoad(g grid.Grid) int {
+func calculateLoad(g grid.StringGrid) int {
 	load := 0
 
 	height := len(g)
@@ -94,19 +94,19 @@ func Part2(input string) int {
 		rockMap = tiltNorth(rockMap)
 
 		// West
-		rockMap = grid.RotateClockwise(rockMap)
+		rockMap = rockMap.RotateClockwise()
 		rockMap = tiltNorth(rockMap)
 
 		// South
-		rockMap = grid.RotateClockwise(rockMap)
+		rockMap = rockMap.RotateClockwise()
 		rockMap = tiltNorth(rockMap)
 
 		// East
-		rockMap = grid.RotateClockwise(rockMap)
+		rockMap = rockMap.RotateClockwise()
 		rockMap = tiltNorth(rockMap)
 
 		// Rotate back to North
-		rockMap = grid.RotateClockwise(rockMap)
+		rockMap = rockMap.RotateClockwise()
 
 		currentLoad := calculateLoad(rockMap)
 		loads = append(loads, currentLoad)

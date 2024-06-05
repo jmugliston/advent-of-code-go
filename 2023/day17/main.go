@@ -4,7 +4,6 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/atheius/aoc/grid"
 )
@@ -30,12 +29,7 @@ type CruciblePoint struct {
 	Count int
 }
 
-func getHeatLossAtPoint(heatLossMap *grid.Grid, point grid.Point) int {
-	heatLoss, _ := strconv.Atoi((*heatLossMap)[point.Y][point.X])
-	return heatLoss
-}
-
-func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount int, maxCount int) int {
+func findPath(heatLossMap grid.NumberGrid, start grid.Point, end grid.Point, minCount int, maxCount int) int {
 
 	visited := map[CruciblePoint]bool{}
 
@@ -78,7 +72,7 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 			nextStep := grid.GetNextPointInDirection(grid.PointWithDirection{X: currentStep.X, Y: currentStep.Y, Direction: direction})
 			nextCount := currentCount
 
-			if !grid.IsPointInGrid(nextStep, heatLossMap) {
+			if !heatLossMap.IsPointInGrid(nextStep) {
 				continue
 			}
 
@@ -125,17 +119,16 @@ func findPath(heatLossMap grid.Grid, start grid.Point, end grid.Point, minCount 
 				PointWithDirection: grid.PointWithDirection{X: nextStep.X, Y: nextStep.Y, Direction: direction},
 				Count:              nextCount,
 				Path:               nextPath,
-				Heatloss:           currentHeatLoss + getHeatLossAtPoint(&heatLossMap, nextStep),
+				Heatloss:           currentHeatLoss + heatLossMap[nextStep.Y][nextStep.X],
 			})
 		}
 	}
 
 	return minHeatLoss
-
 }
 
 func Part1(input string) int {
-	heatLossMap := grid.Parse(input)
+	heatLossMap := grid.ParseNumbers(input)
 
 	startPoint := grid.Point{X: 0, Y: 0}
 	endPoint := grid.Point{X: len(heatLossMap[0]) - 1, Y: len(heatLossMap) - 1}
@@ -146,7 +139,7 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	heatLossMap := grid.Parse(input)
+	heatLossMap := grid.ParseNumbers(input)
 
 	startPoint := grid.Point{X: 0, Y: 0}
 	endPoint := grid.Point{X: len(heatLossMap[0]) - 1, Y: len(heatLossMap) - 1}

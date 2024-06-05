@@ -104,7 +104,7 @@ func Part1(input string) int {
 	galaxies := getGalaxies(image)
 
 	emptyRows := getEmptyRows(image)
-	emptyCols := getEmptyRows(grid.Transpose(image))
+	emptyCols := getEmptyRows(image.Transpose())
 
 	scaledGalaxies := getScaledGalaxies(galaxies, emptyRows, emptyCols, 2)
 
@@ -124,7 +124,7 @@ func Part2(input string, scale int) int {
 	galaxies := getGalaxies(image)
 
 	emptyRows := getEmptyRows(image)
-	emptyCols := getEmptyRows(grid.Transpose(image))
+	emptyCols := getEmptyRows(image.Transpose())
 
 	scaledGalaxies := getScaledGalaxies(galaxies, emptyRows, emptyCols, scale)
 

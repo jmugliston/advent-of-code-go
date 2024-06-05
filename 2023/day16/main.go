@@ -24,13 +24,13 @@ func main() {
 	fmt.Println(part2Answer)
 }
 
-func getNextSteps(floorMap grid.Grid, currentPointWithDirection grid.PointWithDirection) []grid.PointWithDirection {
+func getNextSteps(floorMap grid.StringGrid, currentPointWithDirection grid.PointWithDirection) []grid.PointWithDirection {
 
 	nextSteps := []grid.PointWithDirection{}
 
 	nextpoint := grid.GetNextPointInDirection(currentPointWithDirection)
 
-	if grid.IsPointInGrid(nextpoint, floorMap) {
+	if floorMap.IsPointInGrid(nextpoint) {
 		// Empty space
 		if floorMap[nextpoint.Y][nextpoint.X] == "." {
 			nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: currentPointWithDirection.Direction})
@@ -99,7 +99,7 @@ func getNextSteps(floorMap grid.Grid, currentPointWithDirection grid.PointWithDi
 	return nextSteps
 }
 
-func getEnergisedTiles(floorMap grid.Grid, start grid.PointWithDirection) int {
+func getEnergisedTiles(floorMap grid.StringGrid, start grid.PointWithDirection) int {
 
 	positions := make(map[grid.PointWithDirection]bool)
 
