@@ -123,6 +123,16 @@ func ManhattenDistance(p1 Point, p2 Point) int {
 	return int(math.Abs(float64(p1.X)-float64(p2.X)) + math.Abs(float64(p1.Y)-float64((p2.Y))))
 }
 
+func ShoelaceFormula(pts []Point) int {
+	sum := 0
+	p0 := pts[len(pts)-1]
+	for _, p1 := range pts {
+		sum += p0.Y*p1.X - p0.X*p1.Y
+		p0 = p1
+	}
+	return int(math.Abs(float64(sum)) / 2)
+}
+
 func Compare[G Grid[N], N string | int](g1 G, g2 G) bool {
 	if len(g1) != len(g2) {
 		return false
