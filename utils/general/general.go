@@ -46,13 +46,17 @@ func Product(values []int) int {
 	return product
 }
 
-func GCD(a, b int64) int64 {
+func GCD(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
 	}
 	return a
 }
 
-func LCM(a, b int64) int64 {
-	return int64(math.Abs(float64(a*b)) / float64(GCD(a, b)))
+func LCM(values []int) int {
+	lcm := values[0]
+	for _, value := range values[1:] {
+		lcm = int(math.Abs(float64(lcm*value)) / float64(GCD(lcm, value)))
+	}
+	return lcm
 }

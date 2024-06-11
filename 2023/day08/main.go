@@ -95,11 +95,5 @@ func Part2(input string) int {
 		}
 	}
 
-	answer := int64(steps[0])
-	for i := 1; i < len(steps); i++ {
-		answer = utils.LCM(int64(answer), int64(steps[i]))
-	}
-
-	return int(answer)
-
+	return utils.LCM(steps)
 }
