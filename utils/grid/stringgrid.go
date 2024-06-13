@@ -28,6 +28,17 @@ func (g StringGrid) IsPointInGrid(p Point) bool {
 	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
 }
 
+func (g StringGrid) Find(char string) Point {
+	for y, line := range g {
+		for x, c := range line {
+			if c == char {
+				return Point{X: x, Y: y}
+			}
+		}
+	}
+	return Point{}
+}
+
 func (g StringGrid) Transpose() StringGrid {
 	newArr := make(StringGrid, len(g[0]))
 	for i := 0; i < len(g); i++ {
