@@ -25,7 +25,7 @@ func TestPart1(t *testing.T) {
 
 func TestPart2(t *testing.T) {
 
-	input, err := os.ReadFile("./input/input.txt")
+	input, err := os.ReadFile("./input/example3.txt")
 
 	if err != nil {
 		panic("Couldn't find the example file!")

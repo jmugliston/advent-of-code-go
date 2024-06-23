@@ -1,28 +1,38 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
 	"github.com/atheius/aoc/parsing"
 )
 
+var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+
 func main() {
-	input, err := os.ReadFile("./input/input.txt")
+	flag.Parse()
+
+	_, filename, _, _ := runtime.Caller(0)
+	dirname := filepath.Dir(filename)
+
+	path := filepath.Join(dirname, "input", "input.txt")
+
+	input, err := os.ReadFile(path)
 
 	if err != nil {
-		panic("Couldn't find the input file!")
+		panic("Could not find the input file")
 	}
 
-	inputString := string(input)
-
-	part1Answer := Part1(inputString)
-	fmt.Println(part1Answer)
-
-	part2Answer := Part2(inputString)
-	fmt.Println(part2Answer)
+	if *partFlag == "1" {
+		fmt.Println(Part1(string(input)))
+	} else {
+		fmt.Println(Part2(string(input)))
+	}
 }
 
 func trimLeadingDots(row string) string {
