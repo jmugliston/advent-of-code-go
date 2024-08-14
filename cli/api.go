@@ -82,8 +82,6 @@ func DownloadInput(year string, day string) {
 
 		path := filepath.Join(".", year, "day"+dayPadded)
 
-		logger.Info("Downloading input for", "year", year, "day", dayPadded)
-
 		FetchInput(year, day, path)
 	}
 }
