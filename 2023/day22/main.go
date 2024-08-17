@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 
 	"github.com/atheius/aoc/parsing"
 )
@@ -40,13 +41,14 @@ type Position struct {
 }
 
 type Brick struct {
-	id    int
-	start Position
-	end   Position
+	id          int
+	positions   []Position
+	bricksAbove []*Brick
+	bricksBelow []*Brick
 }
 
-func parseBricks(lines []string) []Brick {
-	bricks := make([]Brick, 0)
+func parseBricks(lines []string) []*Brick {
+	bricks := make([]*Brick, 0)
 	for idx, line := range lines {
 		var startX, startY, startZ int
 		var endX, endY, endZ int
@@ -61,132 +63,170 @@ func parseBricks(lines []string) []Brick {
 			panic("Could not parse line")
 		}
 
-		bricks = append(bricks, Brick{
-			id:    idx,
-			start: Position{startX, startY, startZ},
-			end:   Position{endX, endY, endZ},
+		brickPositions := make([]Position, 0)
+		for x := startX; x <= endX; x++ {
+			for y := startY; y <= endY; y++ {
+				for z := startZ; z <= endZ; z++ {
+					brickPositions = append(brickPositions, Position{x, y, z})
+				}
+			}
+		}
+
+		bricks = append(bricks, &Brick{
+			id:        idx,
+			positions: brickPositions,
 		})
 	}
+
 	return bricks
 }
 
-func createPositionMap(bricks []Brick) map[Position]Brick {
-	var positionMap = make(map[Position]Brick)
-
+// Create a map of all brick positions
+func mapAllBrickPositions(bricks []*Brick) map[Position]*Brick {
+	brickPositions := make(map[Position]*Brick)
 	for _, brick := range bricks {
-		for x := brick.start.x; x <= brick.end.x; x++ {
-			for y := brick.start.y; y <= brick.end.y; y++ {
-				for z := brick.start.z; z <= brick.end.z; z++ {
-					position := Position{x, y, z}
-					positionMap[position] = brick
-				}
-			}
+		for _, position := range brick.positions {
+			brickPositions[position] = brick
 		}
 	}
 
-	return positionMap
+	return brickPositions
 }
 
-func canBrickFall(positionMap *map[Position]Brick, brick *Brick) bool {
-	for x := brick.start.x; x <= brick.end.x; x++ {
-		for y := brick.start.y; y <= brick.end.y; y++ {
-			for z := brick.start.z; z <= brick.end.z; z++ {
-				if (z - 1) <= 0 {
-					return false
-				}
-				if brickBelow, ok := (*positionMap)[Position{x, y, z - 1}]; ok {
-					if brick.id != brickBelow.id {
-						return false
-					}
-				}
+// Check if a brick can fall by checking if the position below is empty
+func canBrickFall(brick *Brick, positionMap map[Position]*Brick) bool {
+	for _, position := range brick.positions {
+
+		// Is position at the bottom?
+		if (position.z - 1) <= 0 {
+			return false
+		}
+
+		// Is position occupied by another brick
+		if brickToCheck, ok := positionMap[Position{
+			x: position.x,
+			y: position.y,
+			z: position.z - 1,
+		}]; ok {
+			if brickToCheck.id != brick.id {
+				return false
 			}
 		}
-	}
 
+	}
 	return true
 }
 
-func removeBrickPositions(positionMap *map[Position]Brick, brick *Brick) {
-	for x := brick.start.x; x <= brick.end.x; x++ {
-		for y := brick.start.y; y <= brick.end.y; y++ {
-			for z := brick.start.z; z <= brick.end.z; z++ {
-				delete(*positionMap, Position{x, y, z})
-			}
-		}
-	}
-}
-
-func addBrickPositions(positionMap *map[Position]Brick, brick *Brick) {
-	for x := brick.start.x; x <= brick.end.x; x++ {
-		for y := brick.start.y; y <= brick.end.y; y++ {
-			for z := brick.start.z; z <= brick.end.z; z++ {
-				(*positionMap)[Position{x, y, z}] = *brick
-			}
-		}
-	}
-}
-
-func stabiliseBricks(brickMap map[int]Brick, positionMap map[Position]Brick) map[Position]Brick {
-
+// Stabilise the bricks by moving them down until they can't fall any further
+func stabiliseBricks(bricks []*Brick, brickPositions map[Position]*Brick) []*Brick {
 	keepGoing := true
 
 	for keepGoing {
 		keepGoing = false
-		for i := 0; i < len(brickMap); i++ {
-			brick := brickMap[i]
-			canFall := canBrickFall(&positionMap, &brick)
+		for i := 0; i < len(bricks); i++ {
+			canFall := canBrickFall(bricks[i], brickPositions)
 			if canFall {
 				keepGoing = true
 
-				removeBrickPositions(&positionMap, &brick)
+				prevPositions := bricks[i].positions
 
-				// move brick down
-				brick.start.z -= 1
-				brick.end.z -= 1
-				brickMap[i] = brick
+				// Reset the brick positions
+				bricks[i].positions = make([]Position, 0)
 
-				addBrickPositions(&positionMap, &brick)
+				for _, prevPosition := range prevPositions {
+
+					// Remove the previous position
+					delete(brickPositions, prevPosition)
+
+					// Add the new position
+					brickPositions[Position{
+						x: prevPosition.x,
+						y: prevPosition.y,
+						z: prevPosition.z - 1,
+					}] = bricks[i]
+
+					// Remap the brick position (1 unit down)
+					bricks[i].positions = append(bricks[i].positions, Position{
+						x: prevPosition.x,
+						y: prevPosition.y,
+						z: prevPosition.z - 1,
+					})
+				}
 			}
 		}
 	}
 
-	return positionMap
+	return bricks
 }
 
-func mapBrickDependencies(brickMap map[int]Brick, positionMap map[Position]Brick) (map[int]map[Brick]bool, map[int]map[Brick]bool) {
-	above := make(map[int]map[Brick]bool)
-	below := make(map[int]map[Brick]bool)
+// Check each brick for other bricks directly above / below
+// and add them as dependencies.
+func mapBrickDependencies(bricks []*Brick) {
+	for _, brick := range bricks {
+		for _, brickPosition := range brick.positions {
+			for _, otherBrick := range bricks {
+				if brick.id == otherBrick.id {
+					continue
+				}
 
-	for _, brick := range brickMap {
-		above[brick.id] = make(map[Brick]bool)
-		below[brick.id] = make(map[Brick]bool)
+				if (slices.Contains(otherBrick.positions, Position{
+					x: brickPosition.x,
+					y: brickPosition.y,
+					z: brickPosition.z + 1,
+				})) {
+					if !slices.Contains(brick.bricksAbove, otherBrick) {
+						brick.bricksAbove = append(brick.bricksAbove, otherBrick)
+					}
+					if !slices.Contains(otherBrick.bricksBelow, brick) {
+						otherBrick.bricksBelow = append(otherBrick.bricksBelow, brick)
+					}
+				}
+			}
+		}
 	}
+}
 
-	for _, brick := range brickMap {
-		for x := brick.start.x; x <= brick.end.x; x++ {
-			for y := brick.start.y; y <= brick.end.y; y++ {
-				for z := brick.start.z; z <= brick.end.z; z++ {
-					if otherBrick, ok := positionMap[Position{x, y, z + 1}]; ok {
-						if otherBrick.id != brick.id {
-							above[brick.id][otherBrick] = true
-							below[otherBrick.id][brick] = true
+// Check if a brick can be safely removed (i.e. no bricks above it that require it for support)
+func isBrickSafeToRemove(brick *Brick) bool {
+	for _, brickAbove := range brick.bricksAbove {
+		if len(brickAbove.bricksBelow) == 1 {
+			return false
+		}
+	}
+	return true
+}
+
+// Disintegrate a brick and all bricks above it
+func disintegrateBricks(brick *Brick) int {
+	disintegratedBricks := make([]*Brick, 0)
+
+	disintegratedBricks = append(disintegratedBricks, brick)
+
+	keepGoing := true
+	for keepGoing {
+		keepGoing = false
+		for _, disintegratedBrick := range disintegratedBricks {
+			// Check each of the bricks above the one we're removing
+			for _, brickAbove := range disintegratedBrick.bricksAbove {
+				// If the brick has not already been disintegrated
+				if !slices.Contains(disintegratedBricks, brickAbove) {
+					allBricksBelowDisintegrated := true
+					for _, brickBelow := range brickAbove.bricksBelow {
+						if !slices.Contains(disintegratedBricks, brickBelow) {
+							allBricksBelowDisintegrated = false
 						}
+					}
+					// If all bricks below have disintegrated
+					if allBricksBelowDisintegrated {
+						disintegratedBricks = append(disintegratedBricks, brickAbove)
+						keepGoing = true
 					}
 				}
 			}
 		}
 	}
 
-	return above, below
-}
-
-func isBrickSafeToRemove(brick Brick, above map[int]map[Brick]bool, below map[int]map[Brick]bool) bool {
-	for brickAbove := range above[brick.id] {
-		if len(below[brickAbove.id]) == 1 {
-			return false
-		}
-	}
-	return true
+	return len(disintegratedBricks)
 }
 
 func Part1(input string) int {
@@ -195,20 +235,15 @@ func Part1(input string) int {
 
 	bricks := parseBricks(lines)
 
-	brickMap := make(map[int]Brick)
-	for _, brick := range bricks {
-		brickMap[brick.id] = brick
-	}
+	brickPositions := mapAllBrickPositions(bricks)
 
-	positionMap := createPositionMap(bricks)
+	stableBricks := stabiliseBricks(bricks, brickPositions)
 
-	stablePositionMap := stabiliseBricks(brickMap, positionMap)
-
-	above, below := mapBrickDependencies(brickMap, stablePositionMap)
+	mapBrickDependencies(stableBricks)
 
 	safeToMoveCount := 0
-	for _, brick := range brickMap {
-		if isBrickSafeToRemove(brick, above, below) {
+	for _, brick := range stableBricks {
+		if isBrickSafeToRemove(brick) {
 			safeToMoveCount++
 		}
 	}
@@ -217,5 +252,21 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	return -1
+	lines := parsing.ReadLines(input)
+
+	bricks := parseBricks(lines)
+
+	brickPositions := mapAllBrickPositions(bricks)
+
+	stableBricks := stabiliseBricks(bricks, brickPositions)
+
+	mapBrickDependencies(stableBricks)
+
+	totalBricksDisintegrated := 0
+	for _, brick := range stableBricks {
+		// Disintegrate the brick and all bricks above it (-1 to account for the brick itself)
+		totalBricksDisintegrated += disintegrateBricks(brick) - 1
+	}
+
+	return totalBricksDisintegrated
 }
