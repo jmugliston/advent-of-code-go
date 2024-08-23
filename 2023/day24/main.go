@@ -135,7 +135,7 @@ func findLinePlaneIntersection(p0 point, n point, stone hailstone) (point, int) 
 }
 
 // Line intersect by Paul Bourke http://paulbourke.net/geometry/pointlineplane/
-func lineIntersect(x1 int, y1 int, x2 int, y2 int, x3 int, y3 int, x4 int, y4 int) (bool, []int) {
+func lineIntersect(x1 int, y1 int, x2 int, y2 int, x3 int, y3 int, x4 int, y4 int) (bool, []float64) {
 
 	// Check if none of the lines are of length 0
 	if (x1 == x2 && y1 == y2) || (x3 == x4 && y3 == y4) {
@@ -149,16 +149,16 @@ func lineIntersect(x1 int, y1 int, x2 int, y2 int, x3 int, y3 int, x4 int, y4 in
 		return false, nil
 	}
 
-	ua := ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / denominator
+	ua := float64(((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3))) / float64(denominator)
 
 	// Return a object with the x and y coordinates of the intersection
-	x := x1 + ua*(x2-x1)
-	y := y1 + ua*(y2-y1)
+	x := float64(x1) + ua*(float64(x2-x1))
+	y := float64(y1) + ua*(float64(y2-y1))
 
-	return true, []int{x, y}
+	return true, []float64{x, y}
 }
 
-func xyWithinRange(x int, y int, min int, max int) bool {
+func xyWithinRange(x float64, y float64, min float64, max float64) bool {
 	return x >= min && x <= max && y >= min && y <= max
 }
 
@@ -196,12 +196,12 @@ func Part1(input string, minBound int, maxBound int) int {
 			}
 
 			// Intersection must be in the future
-			if (intersection[0]-x1)/vx1 < 0 || (intersection[0]-x3)/vx2 < 0 {
+			if (intersection[0]-float64(x1))/float64(vx1) < 0 || (intersection[0]-float64(x3))/float64(vx2) < 0 {
 				continue
 			}
 
 			// Intersection must be within bounds
-			if xyWithinRange(intersection[0], intersection[1], minBound, maxBound) {
+			if xyWithinRange(intersection[0], intersection[1], float64(minBound), float64(maxBound)) {
 				intersections++
 			}
 		}
