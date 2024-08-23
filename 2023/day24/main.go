@@ -3,13 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
 
+	"github.com/atheius/aoc/bigInt"
+	"github.com/atheius/aoc/bigxyz"
 	"github.com/atheius/aoc/parsing"
+	"github.com/atheius/aoc/xyz"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
@@ -37,15 +41,14 @@ func main() {
 
 var DIGIT_PATTERN = regexp.MustCompile(`-?\d+`)
 
-type point struct {
-	x int
-	y int
-	z int
+type hailstone struct {
+	position xyz.Coord
+	velocity xyz.Coord
 }
 
-type hailstone struct {
-	position point
-	velocity point
+type hailstoneBig struct {
+	position bigxyz.Coord
+	velocity bigxyz.Coord
 }
 
 func parseHailstones(lines []string) []hailstone {
@@ -66,15 +69,15 @@ func parseHailstones(lines []string) []hailstone {
 		}
 
 		hailstone := hailstone{
-			position: point{
-				x: digits[0],
-				y: digits[1],
-				z: digits[2],
+			position: xyz.Coord{
+				X: digits[0],
+				Y: digits[1],
+				Z: digits[2],
 			},
-			velocity: point{
-				x: digits[3],
-				y: digits[4],
-				z: digits[5],
+			velocity: xyz.Coord{
+				X: digits[3],
+				Y: digits[4],
+				Z: digits[5],
 			},
 		}
 
@@ -85,53 +88,12 @@ func parseHailstones(lines []string) []hailstone {
 
 }
 
-func dot(a point, b point) int {
-	return a.x*b.x + a.y*b.y + a.z*b.z
-}
-
-func cross(a point, b point) point {
-	return point{
-		x: a.y*b.z - a.z*b.y,
-		y: a.z*b.x - a.x*b.z,
-		z: a.x*b.y - a.y*b.x,
-	}
-}
-
-func minus(a point, b point) point {
-	return point{
-		x: a.x - b.x,
-		y: a.y - b.y,
-		z: a.z - b.z,
-	}
-}
-
-func plus(a point, b point) point {
-	return point{
-		x: a.x + b.x,
-		y: a.y + b.y,
-		z: a.z + b.z,
-	}
-}
-
-func multiply(a point, b int) point {
-	return point{
-		x: a.x * b,
-		y: a.y * b,
-		z: a.z * b,
-	}
-}
-
-func divide(a point, b int) point {
-	return point{
-		x: a.x / b,
-		y: a.y / b,
-		z: a.z / b,
-	}
-}
-
-func findLinePlaneIntersection(p0 point, n point, stone hailstone) (point, int) {
-	d := dot(minus(p0, stone.position), n) / dot(stone.velocity, n)
-	return plus(stone.position, multiply(stone.velocity, d)), d
+func findLinePlaneIntersection(p0 bigxyz.Coord, n bigxyz.Coord, stone hailstoneBig) (bigxyz.Coord, *big.Int) {
+	d := bigInt.Div(
+		bigxyz.Dot(bigxyz.Minus(p0, stone.position), n),
+		bigxyz.Dot(stone.velocity, n),
+	)
+	return bigxyz.Plus(stone.position, bigxyz.Multiply(stone.velocity, d)), d
 }
 
 // Line intersect by Paul Bourke http://paulbourke.net/geometry/pointlineplane/
@@ -171,20 +133,20 @@ func Part1(input string, minBound int, maxBound int) int {
 	intersections := 0
 	for i := 0; i < len(hailstones); i++ {
 		for j := i + 1; j < len(hailstones); j++ {
-			vx1 := hailstones[i].velocity.x
-			vy1 := hailstones[i].velocity.y
+			vx1 := hailstones[i].velocity.X
+			vy1 := hailstones[i].velocity.Y
 
-			vx2 := hailstones[j].velocity.x
-			vy2 := hailstones[j].velocity.y
+			vx2 := hailstones[j].velocity.X
+			vy2 := hailstones[j].velocity.Y
 
-			x1 := hailstones[i].position.x
-			y1 := hailstones[i].position.y
+			x1 := hailstones[i].position.X
+			y1 := hailstones[i].position.Y
 
 			x2 := x1 + vx1
 			y2 := y1 + vy1
 
-			x3 := hailstones[j].position.x
-			y3 := hailstones[j].position.y
+			x3 := hailstones[j].position.X
+			y3 := hailstones[j].position.Y
 
 			x4 := x3 + vx2
 			y4 := y3 + vy2
@@ -210,6 +172,14 @@ func Part1(input string, minBound int, maxBound int) int {
 	return intersections
 }
 
+func convertToCoordBig(coord xyz.Coord) bigxyz.Coord {
+	return bigxyz.Coord{
+		X: big.NewInt(int64(coord.X)),
+		Y: big.NewInt(int64(coord.Y)),
+		Z: big.NewInt(int64(coord.Z)),
+	}
+}
+
 // Credit to this comment on Reddit for the methodology of the solution
 // https://www.reddit.com/r/adventofcode/comments/18q0kfc/comment/kes6ywf
 func Part2(input string) int {
@@ -222,11 +192,12 @@ func Part2(input string) int {
 	reference := hailstones[0]
 
 	// Map hailstones relative to the first one
-	relativeHailstones := make([]hailstone, 0)
+	relativeHailstones := make([]hailstoneBig, 0)
 	for _, stone := range hailstones {
-		relativeHailstones = append(relativeHailstones, hailstone{
-			position: minus(stone.position, reference.position),
-			velocity: minus(stone.velocity, reference.velocity),
+		relativeHailstones = append(relativeHailstones, hailstoneBig{
+			// We have to use big ints for this solution because the numbers are too large!
+			position: convertToCoordBig(xyz.Minus(stone.position, reference.position)),
+			velocity: convertToCoordBig(xyz.Minus(stone.velocity, reference.velocity)),
 		})
 	}
 
@@ -237,28 +208,35 @@ func Part2(input string) int {
 	// the plane defined by the origin (0,0,0) and any two points on
 	// the next hailstones trajectory
 
-	hailstone1 := relativeHailstones[1]
-	hailstone1position2 := plus(hailstone1.position, hailstone1.velocity)
-
 	// Get the normal vector of hailstone 1
-	n := cross(hailstone1.position, hailstone1position2)
+	hailstone1 := relativeHailstones[1]
+	hailstone1position2 := bigxyz.Plus(hailstone1.position, hailstone1.velocity)
+	n := bigxyz.Cross(hailstone1.position, hailstone1position2)
 
 	// Take two more hailstones and find the intersections their lines with the plane
-	intersection1position, intersection1time := findLinePlaneIntersection(point{0, 0, 0}, n, relativeHailstones[2])
-	intersection2position, intersection2time := findLinePlaneIntersection(point{0, 0, 0}, n, relativeHailstones[3])
+	intersection1position, intersection1time := findLinePlaneIntersection(
+		bigxyz.Coord{X: big.NewInt(0), Y: big.NewInt(0), Z: big.NewInt(0)},
+		n,
+		relativeHailstones[2],
+	)
+	intersection2position, intersection2time := findLinePlaneIntersection(
+		bigxyz.Coord{X: big.NewInt(0), Y: big.NewInt(0), Z: big.NewInt(0)},
+		n,
+		relativeHailstones[3],
+	)
 
-	timeDiff := intersection2time - intersection1time
+	timeDiff := bigInt.Sub(intersection2time, intersection1time)
 
 	// This is the relative rock velocity (velocity = distance / time)
-	relativeRockVelocity := divide(minus(intersection2position, intersection1position), timeDiff)
+	relativeRockVelocity := bigxyz.Divide(bigxyz.Minus(intersection2position, intersection1position), timeDiff)
 
 	// This is the relative rock position (distance = velocity * time)
-	relativeRockPosition := minus(intersection1position, multiply(relativeRockVelocity, intersection1time))
+	relativeRockPosition := bigxyz.Minus(intersection1position, bigxyz.Multiply(relativeRockVelocity, intersection1time))
 
 	// Convert back to absolute position
-	rockPosition := plus(relativeRockPosition, reference.position)
+	rockPosition := bigxyz.Plus(relativeRockPosition, convertToCoordBig(reference.position))
 
-	result := rockPosition.x + rockPosition.y + rockPosition.z
+	result := bigInt.Add(bigInt.Add(rockPosition.X, rockPosition.Y), rockPosition.Z)
 
-	return int(result)
+	return int(result.Int64())
 }
