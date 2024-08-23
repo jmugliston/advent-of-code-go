@@ -48,7 +48,7 @@ func isJunction(hikeMap grid.StringGrid, point grid.Point) bool {
 				continue
 			}
 
-			if (hikeMap)[point.Y][point.X] != "#" {
+			if hikeMap[point.Y][point.X] != "#" {
 				pathCount++
 			}
 
