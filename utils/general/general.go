@@ -12,7 +12,7 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V {
 	return r
 }
 
-func Filter[V any](ss []V, test func(value V) bool) (ret []V) {
+func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 	for _, s := range ss {
 		if test(s) {
 			ret = append(ret, s)
