@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/atheius/aoc/parsing"
 	"github.com/atheius/aoc/utils"
@@ -228,12 +229,32 @@ func Part1(input string) int {
 	// Karger's algorithm is randomized so we run it until we find
 	// the min cut of 3 (which we know is the right number of cuts)
 	for {
-		gCopy := g.Clone()
+		result := make(chan int)
+		wait := make(chan struct{})
 
-		cuts, partitions := minCut(gCopy)
+		var waitGroup sync.WaitGroup
+		go func() {
+			// Try 100 iterations in parallel
+			for i := 0; i < 100; i++ {
+				waitGroup.Add(1)
+				go func() {
+					defer waitGroup.Done()
+					cuts, partitions := minCut(g.Clone())
+					if len(cuts) == 3 {
+						result <- len(partitions[0]) * len(partitions[1])
+					}
+				}()
+			}
+			waitGroup.Wait()
+			close(wait)
+		}()
 
-		if len(cuts) == 3 {
-			return len(partitions[0]) * len(partitions[1])
+		// Wait for threads to finish or a result to be found
+		select {
+		case answer := <-result:
+			return answer
+		case <-wait:
+			// No result found, try again
 		}
 	}
 
