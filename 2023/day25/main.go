@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/atheius/aoc/graph"
 	"github.com/atheius/aoc/parsing"
-	"github.com/atheius/aoc/utils"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
@@ -35,112 +35,11 @@ func main() {
 	}
 }
 
-type Graph struct {
-	Nodes []*Node
-	Edges []*Edge
-}
-
-type Node struct {
-	Name string
-	Data []string
-}
-
-type Edge struct {
-	Source string
-	Target string
-	Data   []string
-}
-
-func (g *Graph) Clone() Graph {
-	clone := Graph{
-		Nodes: make([]*Node, len(g.Nodes)),
-		Edges: make([]*Edge, len(g.Edges)),
-	}
-
-	for i, node := range g.Nodes {
-		clone.Nodes[i] = &Node{
-			Name: node.Name,
-			Data: make([]string, len(node.Data)),
-		}
-		copy(clone.Nodes[i].Data, node.Data)
-	}
-
-	for i, edge := range g.Edges {
-		clone.Edges[i] = &Edge{
-			Source: edge.Source,
-			Target: edge.Target,
-			Data:   edge.Data,
-		}
-	}
-
-	return clone
-}
-
-func (g *Graph) GetNode(n string) (*Node, error) {
-	for _, node := range g.Nodes {
-		if node.Name == n {
-			return node, nil
-		}
-	}
-	return &Node{}, fmt.Errorf("Node not found")
-}
-
-func (g *Graph) AddNode(n string) error {
-	existing, _ := g.GetNode(n)
-
-	if existing.Name != "" {
-		return nil
-	}
-
-	g.Nodes = append(g.Nodes, &Node{
-		Name: n,
-	})
-
-	return nil
-}
-
-func (g *Graph) RemoveNode(n string) error {
-	g.Nodes = utils.Filter(g.Nodes, func(node *Node) bool {
-		return node.Name != n
-	})
-
-	return nil
-}
-
-func (g *Graph) AddEdge(name, source, target string) error {
-	_, err := g.GetNode(source)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = g.GetNode(target)
-
-	if err != nil {
-		return err
-	}
-
-	g.Edges = append(g.Edges, &Edge{
-		Source: source,
-		Target: target,
-		// Store the original node soure/target in data (used for final output)
-		Data: []string{source, target},
-	})
-
-	return nil
-}
-
-func (g *Graph) RemoveEdge(source, target string) {
-	g.Edges = utils.Filter(g.Edges, func(edge *Edge) bool {
-		return !(edge.Source == source && edge.Target == target)
-	})
-}
-
-func parseInput(input string) Graph {
+func parseInput(input string) graph.Graph {
 	lines := parsing.ReadLines(input)
 
-	g := Graph{
-		Nodes: make([]*Node, 0),
+	g := graph.Graph{
+		Nodes: make([]*graph.Node, 0),
 	}
 
 	for _, line := range lines {
@@ -154,9 +53,11 @@ func parseInput(input string) Graph {
 		for _, dest := range destinations {
 			g.AddNode(dest)
 			// Set the edge name as the original source/target node names
-			g.AddEdge(source+"-"+dest, source, dest)
+			g.AddEdge(source+"-"+dest, source, dest, []string{source, dest})
 		}
 	}
+
+	fmt.Println(len(g.Nodes))
 
 	return g
 }
@@ -164,7 +65,7 @@ func parseInput(input string) Graph {
 // Karger's algorithm for finding the minimum cut in a graph
 // https://en.wikipedia.org/wiki/Karger%27s_algorithm
 // Returns the edges that were cut, and the two partitions
-func minCut(g Graph) ([]*Edge, [][]string) {
+func minCut(g graph.Graph) ([]*graph.Edge, [][]string) {
 
 	for {
 		if len(g.Nodes) == 2 {
@@ -202,9 +103,9 @@ func minCut(g Graph) ([]*Edge, [][]string) {
 		g.RemoveNode(b)
 	}
 
-	cuts := make([]*Edge, 0)
+	cuts := make([]*graph.Edge, 0)
 	for _, edge := range g.Edges {
-		cuts = append(cuts, &Edge{
+		cuts = append(cuts, &graph.Edge{
 			// Get the original node names from the edge data
 			Source: edge.Data[0],
 			Target: edge.Data[1],

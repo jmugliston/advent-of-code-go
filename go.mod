@@ -16,6 +16,8 @@ replace github.com/atheius/aoc/xyz => ./utils/geometry/xyz
 
 replace github.com/atheius/aoc/bigxyz => ./utils/geometry/bigxyz
 
+replace github.com/atheius/aoc/graph => ./utils/graph
+
 require (
 	github.com/atheius/aoc/grid v0.0.0-00010101000000-000000000000
 	github.com/atheius/aoc/parsing v0.0.0-00010101000000-000000000000
@@ -27,6 +29,7 @@ require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/atheius/aoc/bigInt v0.0.0-00010101000000-000000000000
 	github.com/atheius/aoc/bigxyz v0.0.0-00010101000000-000000000000
+	github.com/atheius/aoc/graph v0.0.0-00010101000000-000000000000
 	github.com/atheius/aoc/xyz v0.0.0-00010101000000-000000000000
 	github.com/charmbracelet/log v0.4.0
 	github.com/joho/godotenv v1.5.1
