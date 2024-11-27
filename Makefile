@@ -13,6 +13,10 @@ install:
 	@echo "Installing: ${BINARY} ${VERSION} ${BUILD}"
 	@go install ${LDFLAGS}
 
+test:
+	@echo "Testing: ${BINARY}"
+	@go test ./...
+
 clean:
 	@echo "Cleaning: ${BINARY}"
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
