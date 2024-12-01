@@ -60,3 +60,10 @@ func LCM(values []int) int {
 	}
 	return lcm
 }
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
