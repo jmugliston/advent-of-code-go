@@ -22,3 +22,13 @@ func ReadDigits(input string) []int {
 func ReadLines(input string) []string {
 	return strings.Split(strings.TrimSpace(input), "\n")
 }
+
+func ReadLinesOfDigits(input string) [][]int {
+	var lines [][]int
+
+	for _, line := range ReadLines(input) {
+		lines = append(lines, ReadDigits(line))
+	}
+
+	return lines
+}

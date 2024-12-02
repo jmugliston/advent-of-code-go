@@ -30,6 +30,12 @@ func IndexOf(limit int, predicate func(i int) bool) int {
 	return -1
 }
 
+func RemoveIndex(s []int, index int) []int {
+	ret := make([]int, 0)
+	ret = append(ret, s[:index]...)
+	return append(ret, s[index+1:]...)
+}
+
 func Sum(values []int) int {
 	sum := 0
 	for _, value := range values {
