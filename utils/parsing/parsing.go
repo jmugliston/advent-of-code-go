@@ -6,28 +6,28 @@ import (
 	"strings"
 )
 
-func ReadDigits(input string) []int {
-	var digits []int
+func ReadNumbers(input string) []int {
+	var numbers []int
 
 	numbersString := regexp.MustCompile(`\s+`).Split(strings.TrimSpace(input), -1)
 
 	for _, char := range numbersString {
-		digit, _ := strconv.Atoi(string(char))
-		digits = append(digits, digit)
+		number, _ := strconv.Atoi(string(char))
+		numbers = append(numbers, number)
 	}
 
-	return digits
+	return numbers
 }
 
 func ReadLines(input string) []string {
 	return strings.Split(strings.TrimSpace(input), "\n")
 }
 
-func ReadLinesOfDigits(input string) [][]int {
+func ReadLinesOfNumbers(input string) [][]int {
 	var lines [][]int
 
 	for _, line := range ReadLines(input) {
-		lines = append(lines, ReadDigits(line))
+		lines = append(lines, ReadNumbers(line))
 	}
 
 	return lines

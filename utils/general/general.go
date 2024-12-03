@@ -36,6 +36,16 @@ func RemoveIndex(s []int, index int) []int {
 	return append(ret, s[index+1:]...)
 }
 
+func EveryNthElement[T any](values []T, n int) []T {
+	result := []T{}
+	for i, value := range values {
+		if i%n == 0 {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
 func Sum(values []int) int {
 	sum := 0
 	for _, value := range values {

@@ -41,7 +41,7 @@ func getRangeMaps(lines []string) [][][]int {
 		rangeLines := strings.Split(rangeMap, "\n")[1:]
 		var ranges [][]int
 		for _, nextRange := range rangeLines {
-			ranges = append(ranges, parsing.ReadDigits(nextRange))
+			ranges = append(ranges, parsing.ReadNumbers(nextRange))
 		}
 		rangeMaps = append(rangeMaps, ranges)
 	}
@@ -80,7 +80,7 @@ func Part1(input string) int {
 	lines := strings.Split(strings.TrimSpace(input), "\n\n")
 
 	seedLine := strings.Split(lines[0], ": ")
-	seeds := parsing.ReadDigits(seedLine[1])
+	seeds := parsing.ReadNumbers(seedLine[1])
 
 	rangeMaps := getRangeMaps(lines[1:])
 
@@ -96,7 +96,7 @@ func Part2(input string) int {
 	lines := strings.Split(strings.TrimSpace(input), "\n\n")
 
 	seedLine := strings.Split(lines[0], ": ")
-	seedRangeList := parsing.ReadDigits(seedLine[1])
+	seedRangeList := parsing.ReadNumbers(seedLine[1])
 
 	seedRanges := [][]int{}
 

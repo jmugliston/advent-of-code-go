@@ -90,7 +90,7 @@ func Part1(input string) int {
 
 	var numbers []int
 	for _, line := range lines {
-		nums := parsing.ReadDigits(line)
+		nums := parsing.ReadNumbers(line)
 		nextLines := getNextLines(nums)
 		nextNumber := getNextNumber(nextLines, false)
 		numbers = append(numbers, nextNumber)
@@ -104,7 +104,7 @@ func Part2(input string) int {
 
 	var numbers []int
 	for _, line := range lines {
-		nums := parsing.ReadDigits(line)
+		nums := parsing.ReadNumbers(line)
 		nextLines := getNextLines(nums)
 		nextNumber := getNextNumber(nextLines, true)
 		numbers = append(numbers, nextNumber)

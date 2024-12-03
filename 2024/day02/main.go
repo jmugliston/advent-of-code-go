@@ -56,7 +56,7 @@ func isReportSafe(line []int) bool {
 }
 
 func Part1(input string) int {
-	lines := parsing.ReadLinesOfDigits(input)
+	lines := parsing.ReadLinesOfNumbers(input)
 
 	numSafeReports := 0
 
@@ -71,7 +71,7 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	lines := parsing.ReadLinesOfDigits(input)
+	lines := parsing.ReadLinesOfNumbers(input)
 
 	numSafeReports := 0
 

@@ -44,8 +44,8 @@ func createCards(lines []string) []Card {
 		gameString := strings.Split(line, ": ")
 		numbers := strings.Split(gameString[1], " | ")
 
-		winningNumbers := parsing.ReadDigits(numbers[0])
-		scratchcardNumbers := parsing.ReadDigits(numbers[1])
+		winningNumbers := parsing.ReadNumbers(numbers[0])
+		scratchcardNumbers := parsing.ReadNumbers(numbers[1])
 		points := len(intersect.Hash(winningNumbers, scratchcardNumbers))
 
 		nextCard := Card{

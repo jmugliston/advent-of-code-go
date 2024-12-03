@@ -36,18 +36,10 @@ func main() {
 }
 
 func Part1(input string) int {
-	numbers := parsing.ReadDigits(input)
+	numbers := parsing.ReadNumbers(input)
 
-	list_a := []int{}
-	list_b := []int{}
-
-	for idx, num := range numbers {
-		if idx%2 == 0 {
-			list_a = append(list_a, num)
-		} else {
-			list_b = append(list_b, num)
-		}
-	}
+	list_a := utils.EveryNthElement(numbers, 2)
+	list_b := utils.EveryNthElement(numbers[1:], 2)
 
 	sort.Ints(list_a)
 	sort.Ints(list_b)
@@ -61,21 +53,16 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	numbers := parsing.ReadDigits(input)
+	numbers := parsing.ReadNumbers(input)
 
-	list_a := []int{}
+	list_a := utils.EveryNthElement(numbers, 2)
+
 	freq_map_b := map[int]int{}
-
-	for idx, num := range numbers {
-		if idx%2 == 0 {
-			list_a = append(list_a, num)
-		} else {
-			freq_map_b[num]++
-		}
+	for _, num := range utils.EveryNthElement(numbers[1:], 2) {
+		freq_map_b[num]++
 	}
 
 	similarityScore := 0
-
 	for _, num := range list_a {
 		similarityScore += num * freq_map_b[num]
 	}

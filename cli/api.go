@@ -284,5 +284,15 @@ func SubmitAnswer(year string, day string, part string) {
 
 	text := extractNodeText(articleElement)
 
-	fmt.Println(text)
+	if strings.Contains(text, "That's the right answer!") {
+		fmt.Println("⭐ That's the right answer!")
+	} else {
+		lines := strings.Split(text, "  ")
+		for _, line := range lines {
+			if strings.Contains(line, "[") {
+				line = strings.Split(line, " [")[0]
+			}
+			fmt.Println(line)
+		}
+	}
 }

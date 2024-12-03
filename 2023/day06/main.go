@@ -45,8 +45,8 @@ func Part1(input string) int {
 
 	lines := strings.Split(input, "\n")
 
-	times := parsing.ReadDigits(strings.Split(lines[0], ": ")[1])
-	distances := parsing.ReadDigits(strings.Split(lines[1], ": ")[1])
+	times := parsing.ReadNumbers(strings.Split(lines[0], ": ")[1])
+	distances := parsing.ReadNumbers(strings.Split(lines[1], ": ")[1])
 
 	var races []race
 	for i := 0; i < len(distances); i++ {
