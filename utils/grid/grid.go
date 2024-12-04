@@ -37,6 +37,17 @@ const (
 	NorthWest
 )
 
+var Directions = [...]Direction{
+	North,
+	NorthEast,
+	East,
+	SouthEast,
+	South,
+	SouthWest,
+	West,
+	NorthWest,
+}
+
 func (d Direction) String() string {
 	return [...]string{"North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest"}[d-1]
 }
@@ -121,8 +132,7 @@ func GetNextPointInDirection(p PointWithDirection) Point {
 
 func GetNextNPointsInDirection(p PointWithDirection, n int) []Point {
 	var points []Point
-	next := GetNextPointInDirection(p)
-	points = append(points, next)
+	next := Point{X: p.X, Y: p.Y}
 	for i := 0; i < n; i++ {
 		next = GetNextPointInDirection(PointWithDirection{X: next.X, Y: next.Y, Direction: p.Direction})
 		points = append(points, next)

@@ -33,21 +33,19 @@ func main() {
 	}
 }
 
-func isWord(wordsearch grid.StringGrid, word string, startPoint grid.Point, direction grid.Direction) bool {
-	next := grid.Point{X: startPoint.X, Y: startPoint.Y}
+func checkForWord(wordsearch *grid.StringGrid, word string, startPoint grid.Point, direction grid.Direction) bool {
+	nextNPoints := grid.GetNextNPointsInDirection(grid.PointWithDirection{
+		X:         startPoint.X,
+		Y:         startPoint.Y,
+		Direction: direction,
+	}, len(word)-1)
 
-	for _, char := range word {
-		if !wordsearch.IsPointInGrid(next) {
+	points := append([]grid.Point{startPoint}, nextNPoints...)
+
+	for idx, point := range points {
+		if !wordsearch.IsPointInGrid(point) || string(word[idx]) != (*wordsearch)[point.Y][point.X] {
 			return false
 		}
-		if wordsearch[next.Y][next.X] != string(char) {
-			return false
-		}
-		next = grid.GetNextPointInDirection(grid.PointWithDirection{
-			X:         next.X,
-			Y:         next.Y,
-			Direction: direction,
-		})
 	}
 
 	return true
@@ -61,18 +59,9 @@ func Part1(input string) int {
 	for y, row := range wordsearch {
 		for x, cell := range row {
 			if cell == "X" {
-				for _, direction := range []grid.Direction{
-					grid.North,
-					grid.NorthEast,
-					grid.East,
-					grid.SouthEast,
-					grid.South,
-					grid.SouthWest,
-					grid.West,
-					grid.NorthWest,
-				} {
+				for _, direction := range grid.Directions {
 					// Check for the word XMAS in all directions from this "X"
-					if isWord(wordsearch, searchWord, grid.Point{X: x, Y: y}, direction) {
+					if checkForWord(&wordsearch, searchWord, grid.Point{X: x, Y: y}, direction) {
 						total += 1
 					}
 				}
@@ -92,9 +81,9 @@ func Part2(input string) int {
 		for x, cell := range row {
 			if cell == "A" {
 				points := grid.SurroundingPoints(grid.Point{X: x, Y: y})
-				// Check both diagonals for the word "MAS"
-				diagonalA := isWord(wordsearch, searchWord, points.NorthWest, grid.SouthEast) || isWord(wordsearch, searchWord, points.SouthEast, grid.NorthWest)
-				diagonalB := isWord(wordsearch, searchWord, points.NorthEast, grid.SouthWest) || isWord(wordsearch, searchWord, points.SouthWest, grid.NorthEast)
+				// Check both diagonals for the word "MAS" from this "A"
+				diagonalA := checkForWord(&wordsearch, searchWord, points.NorthWest, grid.SouthEast) || checkForWord(&wordsearch, searchWord, points.SouthEast, grid.NorthWest)
+				diagonalB := checkForWord(&wordsearch, searchWord, points.NorthEast, grid.SouthWest) || checkForWord(&wordsearch, searchWord, points.SouthWest, grid.NorthEast)
 				if diagonalA && diagonalB {
 					total += 1
 				}
