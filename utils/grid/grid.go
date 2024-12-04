@@ -119,6 +119,17 @@ func GetNextPointInDirection(p PointWithDirection) Point {
 	}
 }
 
+func GetNextNPointsInDirection(p PointWithDirection, n int) []Point {
+	var points []Point
+	next := GetNextPointInDirection(p)
+	points = append(points, next)
+	for i := 0; i < n; i++ {
+		next = GetNextPointInDirection(PointWithDirection{X: next.X, Y: next.Y, Direction: p.Direction})
+		points = append(points, next)
+	}
+	return points
+}
+
 func ManhattenDistance(p1 Point, p2 Point) int {
 	return int(math.Abs(float64(p1.X)-float64(p2.X)) + math.Abs(float64(p1.Y)-float64((p2.Y))))
 }
