@@ -33,6 +33,10 @@ func (g NumberGrid) IsPointInGrid(p Point) bool {
 	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
 }
 
+func (g NumberGrid) GetPoint(p Point) int {
+	return g[p.Y][p.X]
+}
+
 func (g NumberGrid) Transpose() NumberGrid {
 	newArr := make(NumberGrid, len(g[0]))
 	for i := 0; i < len(g); i++ {

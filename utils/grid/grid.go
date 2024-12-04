@@ -107,6 +107,10 @@ func SurroundingPoints(p Point) DirectionalPoints {
 	}
 }
 
+func (p Point) SurroundingPoints() DirectionalPoints {
+	return SurroundingPoints(p)
+}
+
 func GetNextPointInDirection(p PointWithDirection) Point {
 	switch p.Direction {
 	case North:
@@ -128,6 +132,10 @@ func GetNextPointInDirection(p PointWithDirection) Point {
 	default:
 		return Point{}
 	}
+}
+
+func (p Point) GetNextPointInDirection(d Direction) Point {
+	return GetNextPointInDirection(PointWithDirection{X: p.X, Y: p.Y, Direction: d})
 }
 
 func GetNextNPointsInDirection(p PointWithDirection, n int) []Point {

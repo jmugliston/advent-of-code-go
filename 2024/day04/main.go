@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/atheius/aoc/grid"
 )
@@ -33,38 +34,17 @@ func main() {
 	}
 }
 
-func checkForWord(wordsearch *grid.StringGrid, word string, startPoint grid.Point, direction grid.Direction) bool {
-	nextNPoints := grid.GetNextNPointsInDirection(grid.PointWithDirection{
-		X:         startPoint.X,
-		Y:         startPoint.Y,
-		Direction: direction,
-	}, len(word)-1)
-
-	points := append([]grid.Point{startPoint}, nextNPoints...)
-
-	for idx, point := range points {
-		if !wordsearch.IsPointInGrid(point) || string(word[idx]) != (*wordsearch)[point.Y][point.X] {
-			return false
-		}
-	}
-
-	return true
-}
-
 func Part1(input string) int {
 	wordsearch := grid.Parse(input)
-	searchWord := "XMAS"
 
 	total := 0
-	for y, row := range wordsearch {
-		for x, cell := range row {
-			if cell == "X" {
-				for _, direction := range grid.Directions {
-					// Check for the word XMAS in all directions from this "X"
-					if checkForWord(&wordsearch, searchWord, grid.Point{X: x, Y: y}, direction) {
-						total += 1
-					}
-				}
+	for _, point := range wordsearch.FindAll("X") {
+		for _, direction := range grid.Directions {
+			nextNPoints := grid.GetNextNPointsInDirection(grid.PointWithDirection{X: point.X, Y: point.Y, Direction: direction}, 3)
+			wordPoints := append([]grid.Point{point}, nextNPoints...)
+			word := strings.Join(wordsearch.GetPoints(wordPoints)[:], "")
+			if word == "XMAS" {
+				total += 1
 			}
 		}
 	}
@@ -74,19 +54,21 @@ func Part1(input string) int {
 
 func Part2(input string) int {
 	wordsearch := grid.Parse(input)
-	searchWord := "MAS"
 
 	total := 0
-	for y, row := range wordsearch {
-		for x, cell := range row {
-			if cell == "A" {
-				points := grid.SurroundingPoints(grid.Point{X: x, Y: y})
-				// Check both diagonals for the word "MAS" from this "A"
-				diagonalA := checkForWord(&wordsearch, searchWord, points.NorthWest, grid.SouthEast) || checkForWord(&wordsearch, searchWord, points.SouthEast, grid.NorthWest)
-				diagonalB := checkForWord(&wordsearch, searchWord, points.NorthEast, grid.SouthWest) || checkForWord(&wordsearch, searchWord, points.SouthWest, grid.NorthEast)
-				if diagonalA && diagonalB {
-					total += 1
-				}
+	for _, point := range wordsearch.FindAll("A") {
+		points := point.SurroundingPoints()
+
+		nw := wordsearch.GetPoint(points.NorthWest)
+		se := wordsearch.GetPoint(points.SouthEast)
+		ne := wordsearch.GetPoint(points.NorthEast)
+		sw := wordsearch.GetPoint(points.SouthWest)
+
+		// NorthWest -> SouthEast diagonal
+		if nw == "M" && se == "S" || se == "M" && nw == "S" {
+			// NorthEast -> SouthWest diagonal
+			if ne == "M" && sw == "S" || sw == "M" && ne == "S" {
+				total += 1
 			}
 		}
 	}

@@ -12,6 +12,14 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V {
 	return r
 }
 
+func Map[T, V any](ts []T, fn func(T) V) []V {
+	result := make([]V, len(ts))
+	for i, t := range ts {
+		result[i] = fn(t)
+	}
+	return result
+}
+
 func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 	for _, s := range ss {
 		if test(s) {

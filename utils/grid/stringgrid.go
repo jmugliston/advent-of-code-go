@@ -28,6 +28,21 @@ func (g StringGrid) IsPointInGrid(p Point) bool {
 	return p.Y >= 0 && p.Y < len(g) && p.X >= 0 && p.X < len(g[0])
 }
 
+func (g StringGrid) GetPoint(p Point) string {
+	if !g.IsPointInGrid(p) {
+		return ""
+	}
+	return g[p.Y][p.X]
+}
+
+func (g StringGrid) GetPoints(p []Point) []string {
+	points := []string{}
+	for _, point := range p {
+		points = append(points, g.GetPoint(point))
+	}
+	return points
+}
+
 func (g StringGrid) Find(char string) Point {
 	for y, line := range g {
 		for x, c := range line {
@@ -37,6 +52,18 @@ func (g StringGrid) Find(char string) Point {
 		}
 	}
 	return Point{}
+}
+
+func (g StringGrid) FindAll(char string) []Point {
+	points := []Point{}
+	for y, line := range g {
+		for x, c := range line {
+			if c == char {
+				points = append(points, Point{X: x, Y: y})
+			}
+		}
+	}
+	return points
 }
 
 func (g StringGrid) Transpose() StringGrid {
