@@ -35,6 +35,12 @@ func (g StringGrid) GetPoint(p Point) string {
 	return g[p.Y][p.X]
 }
 
+func (g StringGrid) SetPoint(p Point, value string) {
+	if g.IsPointInGrid(p) {
+		g[p.Y][p.X] = value
+	}
+}
+
 func (g StringGrid) GetPoints(p []Point) []string {
 	points := []string{}
 	for _, point := range p {

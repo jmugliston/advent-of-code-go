@@ -53,7 +53,7 @@ func (d Direction) String() string {
 }
 
 func (d Direction) EnumIndex() int {
-	return int(d)
+	return int(d) - 1
 }
 
 type DirectionalPoints struct {
@@ -109,6 +109,10 @@ func SurroundingPoints(p Point) DirectionalPoints {
 
 func (p Point) SurroundingPoints() DirectionalPoints {
 	return SurroundingPoints(p)
+}
+
+func (d Direction) TurnRight90() Direction {
+	return Directions[(d.EnumIndex()+2)%8]
 }
 
 func GetNextPointInDirection(p PointWithDirection) Point {
