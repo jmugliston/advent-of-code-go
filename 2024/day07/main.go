@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,62 +57,35 @@ func parseInput(input string) []equation {
 	return equations
 }
 
-func generateCombinations(operators []string, n int) [][]string {
-	if n == 0 {
-		return [][]string{{}}
+func isEquationValid(result int, numbers []int, useConcat bool) bool {
+	if len(numbers) == 1 {
+		return result == numbers[0]
 	}
 
-	combinations := make([][]string, 0, int(math.Pow(float64(len(operators)), float64(n))))
-	for _, combination := range generateCombinations(operators, n-1) {
-		for _, operator := range operators {
-			newCombination := append([]string{}, combination...)
-			newCombination = append(newCombination, operator)
-			combinations = append(combinations, newCombination)
-		}
+	nextNums := numbers[2:]
+
+	if isEquationValid(result, append([]int{numbers[0] + numbers[1]}, nextNums...), useConcat) {
+		return true
 	}
 
-	return combinations
-}
+	if isEquationValid(result, append([]int{numbers[0] * numbers[1]}, nextNums...), useConcat) {
+		return true
+	}
 
-func testEquation(e equation, operators []string) bool {
-	n := len(e.numbers) - 1
-
-	operatorCombinations := generateCombinations(operators, n)
-
-	for _, combination := range operatorCombinations {
-
-		result := e.numbers[0]
-		for i := 1; i < len(e.numbers); i++ {
-			operator := combination[i-1]
-			nextNumber := e.numbers[i]
-
-			switch operator {
-			case "+":
-				result = result + nextNumber
-			case "*":
-				result = result * nextNumber
-			case "||":
-				result, _ = strconv.Atoi(strconv.Itoa(result) + strconv.Itoa(nextNumber))
-			}
-		}
-
-		if e.result == result {
-			return true
-		}
-
+	if useConcat {
+		concat, _ := strconv.Atoi(strconv.Itoa(numbers[0]) + strconv.Itoa(numbers[1]))
+		return isEquationValid(result, append([]int{concat}, nextNums...), true)
 	}
 
 	return false
 }
 
 func Part1(input string) int {
-	operators := []string{"+", "*"}
-
 	equations := parseInput(input)
 
 	total := 0
 	for _, equation := range equations {
-		if testEquation(equation, operators) {
+		if isEquationValid(equation.result, equation.numbers, false) {
 			total = total + equation.result
 		}
 	}
@@ -122,13 +94,11 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	operators := []string{"+", "*", "||"}
-
 	equations := parseInput(input)
 
 	total := 0
 	for _, equation := range equations {
-		if testEquation(equation, operators) {
+		if isEquationValid(equation.result, equation.numbers, true) {
 			total = total + equation.result
 		}
 	}
