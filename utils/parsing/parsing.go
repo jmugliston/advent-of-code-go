@@ -19,6 +19,17 @@ func ReadNumbers(input string) []int {
 	return numbers
 }
 
+func ReadDigits(input string) []int {
+	var digits []int
+
+	for _, char := range input {
+		digit, _ := strconv.Atoi(string(char))
+		digits = append(digits, digit)
+	}
+
+	return digits
+}
+
 func ReadLines(input string) []string {
 	return strings.Split(strings.TrimSpace(input), "\n")
 }
