@@ -37,6 +37,29 @@ func (g NumberGrid) GetPoint(p Point) int {
 	return g[p.Y][p.X]
 }
 
+func (g NumberGrid) Find(num int) Point {
+	for y, line := range g {
+		for x, n := range line {
+			if n == num {
+				return Point{X: x, Y: y}
+			}
+		}
+	}
+	return Point{}
+}
+
+func (g NumberGrid) FindAll(num int) []Point {
+	points := []Point{}
+	for y, line := range g {
+		for x, n := range line {
+			if n == num {
+				points = append(points, Point{X: x, Y: y})
+			}
+		}
+	}
+	return points
+}
+
 func (g NumberGrid) Transpose() NumberGrid {
 	newArr := make(NumberGrid, len(g[0]))
 	for i := 0; i < len(g); i++ {
