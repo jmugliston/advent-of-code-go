@@ -33,18 +33,12 @@ func main() {
 	}
 }
 
-// Create a struct that can hold a point, and a path (slice of points)
 type Path struct {
 	Point grid.Point
 	Path  []grid.Point
 }
 
-func Part1(input string) int {
-	topographicMap := grid.ParseNumbers(input)
-
-	// Find all the start positions
-	startPositions := topographicMap.FindAll(0)
-
+func findPaths(topographicMap grid.NumberGrid, startPositions []grid.Point, includeAllPaths bool) int {
 	total := 0
 	for _, pos := range startPositions {
 
@@ -81,12 +75,14 @@ func Part1(input string) int {
 					continue
 				}
 
-				_, hasVisited := visited[nextPos]
-				if hasVisited {
-					continue
+				if !includeAllPaths {
+					_, hasVisited := visited[nextPos]
+					if hasVisited {
+						continue
+					}
+					visited[nextPos] = true
 				}
 
-				visited[nextPos] = true
 				if topographicMap.GetPoint(nextPos) == 9 {
 					possiblePaths = append(possiblePaths, append(currentPath, nextPos))
 					continue
@@ -106,62 +102,22 @@ func Part1(input string) int {
 	return total
 }
 
+func Part1(input string) int {
+	topographicMap := grid.ParseNumbers(input)
+
+	startPositions := topographicMap.FindAll(0)
+
+	total := findPaths(topographicMap, startPositions, false)
+
+	return total
+}
+
 func Part2(input string) int {
 	topographicMap := grid.ParseNumbers(input)
 
-	// Find all the start positions
 	startPositions := topographicMap.FindAll(0)
 
-	total := 0
-	for _, pos := range startPositions {
-
-		possiblePaths := [][]grid.Point{}
-
-		queue := []Path{
-			{
-				Point: pos,
-				Path:  []grid.Point{pos},
-			},
-		}
-
-		for len(queue) > 0 {
-			currentPoint := queue[0].Point
-			currentPath := queue[0].Path
-
-			// Remove the first element from the queue
-			queue = queue[1:]
-
-			nextPositions := grid.SurroundingPoints(currentPoint)
-
-			for _, nextPos := range []grid.Point{
-				nextPositions.North,
-				nextPositions.East,
-				nextPositions.South,
-				nextPositions.West,
-			} {
-				if !topographicMap.IsPointInGrid(nextPos) {
-					continue
-				}
-
-				if topographicMap.GetPoint(nextPos) != topographicMap.GetPoint(currentPoint)+1 {
-					continue
-				}
-
-				if topographicMap.GetPoint(nextPos) == 9 {
-					possiblePaths = append(possiblePaths, append(currentPath, nextPos))
-					continue
-				}
-
-				// Add next path to the queue
-				queue = append(queue, Path{
-					Point: nextPos,
-					Path:  append(currentPath, nextPos),
-				})
-			}
-		}
-
-		total += len(possiblePaths)
-	}
+	total := findPaths(topographicMap, startPositions, true)
 
 	return total
 }
