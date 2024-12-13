@@ -12,6 +12,14 @@ import (
 	"golang.org/x/net/html"
 )
 
+func getPaddedDay(day string) string {
+	dayPadded := day
+	if len(day) == 1 {
+		dayPadded = "0" + day
+	}
+	return dayPadded
+}
+
 func validateDay(input string) error {
 	num, err := strconv.Atoi(input)
 	if err != nil || num < 1 || num > 25 {
@@ -56,21 +64,34 @@ func saveStringToFile(data string, path string) {
 	}
 }
 
-func findArticleElement(n *html.Node) *html.Node {
+func findArticleElements(n *html.Node) []*html.Node {
+	var articles []*html.Node
 	if n.Type == html.ElementNode && n.Data == "article" {
-		return n
+		articles = append(articles, n)
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		if main := findArticleElement(c); main != nil {
-			return main
-		}
+		articles = append(articles, findArticleElements(c)...)
 	}
-	return nil
+	return articles
 }
 
-func renderNodeToHTML(n *html.Node) string {
+func getQuestionHTML(n *html.Node) string {
+	root := &html.Node{
+		Type: html.ElementNode,
+		Data: "div",
+	}
+
+	articles := findArticleElements(n)
+
+	for _, article := range articles {
+		if article.Parent != nil {
+			article.Parent.RemoveChild(article)
+		}
+		root.AppendChild(article)
+	}
+
 	var buf bytes.Buffer
-	html.Render(&buf, n)
+	html.Render(&buf, root)
 	return buf.String()
 }
 

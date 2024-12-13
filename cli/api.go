@@ -29,10 +29,7 @@ var USER_AGENT string
 //
 //	InitialiseDay("2021", "1")
 func InitialiseDay(year string, day string) {
-	dayPadded := day
-	if len(day) == 1 {
-		dayPadded = "0" + day
-	}
+	dayPadded := getPaddedDay(day)
 
 	path := filepath.Join(".", year, "day"+dayPadded)
 
@@ -43,8 +40,8 @@ func InitialiseDay(year string, day string) {
 	} else {
 		makeFolders(path)
 		createTemplateFiles(path)
-		FetchQuestion(year, day, path)
 	}
+	FetchQuestion(year, day, path, false)
 	FetchInput(year, day, path)
 }
 
@@ -104,12 +101,17 @@ func DownloadInput(year string, day string) {
 //   - If there is an error while parsing the HTML response.
 //   - If the <article> element is not found in the HTML response.
 //   - If there is an error while converting the HTML to Markdown.
-func FetchQuestion(year string, day string, path string) {
+func FetchQuestion(year string, day string, path string, silent bool) {
 	logger.Info("Downloading question for", "year", year, "day", day)
 
 	url := fmt.Sprintf("%s/%s/day/%s", BASE_URL, year, day)
 
-	resp, err := http.Get(url)
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Cookie", SESSION_COOKIE)
+	req.Header.Set("User-Agent", USER_AGENT)
+
+	resp, err := client.Do(req)
 
 	if err != nil {
 		logger.Error("Failed to fetch question file")
@@ -129,18 +131,18 @@ func FetchQuestion(year string, day string, path string) {
 		logger.Error(err)
 	}
 
-	articleElement := findArticleElement(doc)
+	questionHTML := getQuestionHTML(doc)
 
-	if articleElement == nil {
-		logger.Error("Could not find the <article> element in the HTML")
-		os.Exit(1)
-	}
+	// if questionHTML == nil {
+	// 	logger.Error("Could not find the <article> element in the HTML")
+	// 	os.Exit(1)
+	// }
 
-	articleHTML := renderNodeToHTML(articleElement)
+	// articleHTML := renderNodeToHTML(questionHTML)
 
 	converter := md.NewConverter("", true, nil)
 
-	markdown, err := converter.ConvertString(articleHTML)
+	markdown, err := converter.ConvertString(questionHTML)
 
 	if err != nil {
 		panic(err)
@@ -275,17 +277,20 @@ func SubmitAnswer(year string, day string, part string) {
 		os.Exit(1)
 	}
 
-	articleElement := findArticleElement(doc)
+	articleElements := findArticleElements(doc)
 
-	if articleElement == nil {
+	element := articleElements[0]
+
+	if element == nil {
 		logger.Error("Could not find the <article> element in the HTML")
 		os.Exit(1)
 	}
 
-	text := extractNodeText(articleElement)
+	text := extractNodeText(element)
 
 	if strings.Contains(text, "That's the right answer!") {
 		fmt.Println("⭐ That's the right answer!")
+		FetchQuestion(year, day, filepath.Join(".", year, "day"+getPaddedDay(day)), true)
 	} else {
 		lines := strings.Split(text, "  ")
 		for _, line := range lines {
