@@ -10,10 +10,10 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/atheius/aoc/bigInt"
-	"github.com/atheius/aoc/bigxyz"
-	"github.com/atheius/aoc/parsing"
-	"github.com/atheius/aoc/xyz"
+	"github.com/jmugliston/aoc/bigInt"
+	"github.com/jmugliston/aoc/bigxyz"
+	"github.com/jmugliston/aoc/parsing"
+	"github.com/jmugliston/aoc/xyz"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")

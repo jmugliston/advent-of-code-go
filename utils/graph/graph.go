@@ -3,7 +3,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/atheius/aoc/utils"
+	"github.com/jmugliston/aoc/utils"
 )
 
 type Graph struct {

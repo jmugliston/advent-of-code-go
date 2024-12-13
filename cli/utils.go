@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/atheius/aoc/templates"
+	"github.com/jmugliston/aoc/templates"
 	"golang.org/x/net/html"
 )
 

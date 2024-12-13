@@ -1,37 +1,37 @@
-module github.com/atheius/aoc
+module github.com/jmugliston/aoc
 
 go 1.22.2
 
-replace github.com/atheius/aoc/cli => ./cli
+replace github.com/jmugliston/aoc/cli => ./cli
 
-replace github.com/atheius/aoc/utils => ./utils/general
+replace github.com/jmugliston/aoc/utils => ./utils/general
 
-replace github.com/atheius/aoc/grid => ./utils/grid
+replace github.com/jmugliston/aoc/grid => ./utils/grid
 
-replace github.com/atheius/aoc/parsing => ./utils/parsing
+replace github.com/jmugliston/aoc/parsing => ./utils/parsing
 
-replace github.com/atheius/aoc/bigInt => ./utils/bigInt
+replace github.com/jmugliston/aoc/bigInt => ./utils/bigInt
 
-replace github.com/atheius/aoc/xyz => ./utils/geometry/xyz
+replace github.com/jmugliston/aoc/xyz => ./utils/geometry/xyz
 
-replace github.com/atheius/aoc/bigxyz => ./utils/geometry/bigxyz
+replace github.com/jmugliston/aoc/bigxyz => ./utils/geometry/bigxyz
 
-replace github.com/atheius/aoc/graph => ./utils/graph
+replace github.com/jmugliston/aoc/graph => ./utils/graph
 
 require (
-	github.com/atheius/aoc/grid v0.0.0-00010101000000-000000000000
-	github.com/atheius/aoc/parsing v0.0.0-00010101000000-000000000000
-	github.com/atheius/aoc/utils v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/grid v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/parsing v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/utils v0.0.0-00010101000000-000000000000
 	github.com/juliangruber/go-intersect v1.1.0
 )
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
-	github.com/atheius/aoc/bigInt v0.0.0-00010101000000-000000000000
-	github.com/atheius/aoc/bigxyz v0.0.0-00010101000000-000000000000
-	github.com/atheius/aoc/graph v0.0.0-00010101000000-000000000000
-	github.com/atheius/aoc/xyz v0.0.0-00010101000000-000000000000
 	github.com/charmbracelet/log v0.4.0
+	github.com/jmugliston/aoc/bigInt v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/bigxyz v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/graph v0.0.0-00010101000000-000000000000
+	github.com/jmugliston/aoc/xyz v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.8.1

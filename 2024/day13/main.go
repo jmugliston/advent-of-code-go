@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/atheius/aoc/grid"
+	"github.com/jmugliston/aoc/grid"
 	"gonum.org/v1/gonum/mat"
 )
 

@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/atheius/aoc/grid"
-	"github.com/atheius/aoc/parsing"
+	"github.com/jmugliston/aoc/grid"
+	"github.com/jmugliston/aoc/parsing"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")

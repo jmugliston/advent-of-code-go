@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/atheius/aoc/parsing"
+	"github.com/jmugliston/aoc/parsing"
 	"github.com/juliangruber/go-intersect"
 )
 

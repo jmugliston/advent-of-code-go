@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/atheius/aoc/graph"
-	"github.com/atheius/aoc/parsing"
+	"github.com/jmugliston/aoc/graph"
+	"github.com/jmugliston/aoc/parsing"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")

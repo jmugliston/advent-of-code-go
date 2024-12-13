@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/atheius/aoc/grid"
+	"github.com/jmugliston/aoc/grid"
 )
 
 type QueueItem struct {

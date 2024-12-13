@@ -3,7 +3,7 @@ package bigxyz
 import (
 	"math/big"
 
-	"github.com/atheius/aoc/bigInt"
+	"github.com/jmugliston/aoc/bigInt"
 )
 
 type Coord struct {

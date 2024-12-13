@@ -2,7 +2,7 @@
 
 <div align="left">
     <img
-      src="https://github.com/atheius/advent-of-code-go/raw/HEAD/aoc-go.jpeg"
+      src="https://github.com/jmugliston/advent-of-code-go/raw/HEAD/aoc-go.jpeg"
       width="150"
       height="auto"
     />

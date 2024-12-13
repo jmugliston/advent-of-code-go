@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/atheius/aoc/cli"
+	"github.com/jmugliston/aoc/cli"
 	"github.com/joho/godotenv"
 )
 
@@ -30,7 +30,7 @@ func main() {
 
 	cli.VERSION = appVersion
 	cli.SESSION_COOKIE = fmt.Sprintf("session=%s", SESSION_TOKEN)
-	cli.USER_AGENT = fmt.Sprintf("github.com/atheius/aoc-go %s", appVersion)
+	cli.USER_AGENT = fmt.Sprintf("github.com/jmugliston/aoc-go %s", appVersion)
 
 	cli.Execute()
 }

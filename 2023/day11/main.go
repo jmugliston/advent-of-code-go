@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/atheius/aoc/grid"
-	"github.com/atheius/aoc/utils"
+	"github.com/jmugliston/aoc/grid"
+	"github.com/jmugliston/aoc/utils"
 	"gonum.org/v1/gonum/stat/combin"
 )
 

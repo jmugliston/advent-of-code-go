@@ -10,8 +10,8 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/atheius/aoc/grid"
-	"github.com/atheius/aoc/utils"
+	"github.com/jmugliston/aoc/grid"
+	"github.com/jmugliston/aoc/utils"
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
