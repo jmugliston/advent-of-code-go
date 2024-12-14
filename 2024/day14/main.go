@@ -184,11 +184,8 @@ func Part2(input string, writeFile bool) int {
 	boundary := []int{width, height}
 
 	for i := 0; i < 10000; i++ {
-		xPointMap := map[int]bool{}
-
 		for _, robot := range robots {
 			robot.move(boundary)
-			xPointMap[robot.point.X] = true
 			robotMap.SetPoint(robot.point, "#")
 		}
 
