@@ -102,7 +102,9 @@ func DownloadInput(year string, day string) {
 //   - If the <article> element is not found in the HTML response.
 //   - If there is an error while converting the HTML to Markdown.
 func FetchQuestion(year string, day string, path string, silent bool) {
-	logger.Info("Downloading question for", "year", year, "day", day)
+	if !silent {
+		logger.Info("Downloading question for", "year", year, "day", day)
+	}
 
 	url := fmt.Sprintf("%s/%s/day/%s", BASE_URL, year, day)
 
@@ -132,13 +134,6 @@ func FetchQuestion(year string, day string, path string, silent bool) {
 	}
 
 	questionHTML := getQuestionHTML(doc)
-
-	// if questionHTML == nil {
-	// 	logger.Error("Could not find the <article> element in the HTML")
-	// 	os.Exit(1)
-	// }
-
-	// articleHTML := renderNodeToHTML(questionHTML)
 
 	converter := md.NewConverter("", true, nil)
 
