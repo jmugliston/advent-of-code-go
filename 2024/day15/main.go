@@ -138,16 +138,8 @@ func canBoxMove(warehouseMap *grid.StringGrid, direction grid.Direction, boxPosi
 
 	allboxPositions = append(allboxPositions, []grid.Point{boxPositions[0], boxPositions[1]})
 
-	if aValue == "[" && bValue == "." {
-		return canBoxMove(warehouseMap, direction, []grid.Point{a, a.GetNextPointInDirection(grid.West)}, allboxPositions)
-	}
-
 	if aValue == "." && bValue == "[" {
 		return canBoxMove(warehouseMap, direction, []grid.Point{b, b.GetNextPointInDirection(grid.East)}, allboxPositions)
-	}
-
-	if aValue == "." && bValue == "]" {
-		return canBoxMove(warehouseMap, direction, []grid.Point{b.GetNextPointInDirection(grid.West), b}, allboxPositions)
 	}
 
 	if aValue == "]" && bValue == "." {
@@ -163,8 +155,6 @@ func canBoxMove(warehouseMap *grid.StringGrid, direction grid.Direction, boxPosi
 		lCanMove, lBoxes := canBoxMove(warehouseMap, direction, []grid.Point{a.GetNextPointInDirection(grid.West), a}, [][]grid.Point{})
 		if lCanMove && rCanMove {
 			return true, append(allboxPositions, append(lBoxes, rBoxes...)...)
-		} else {
-			return false, allboxPositions
 		}
 	}
 
@@ -215,47 +205,35 @@ func robotMoveScaled(
 				// Hit a wall - do nothing
 			}
 
+			var canMove bool
+			var positions [][]grid.Point
 			if warehouseMap.GetPoint(nextPosition) == "[" {
-				boxPositions := []grid.Point{nextPosition, nextPosition.GetNextPointInDirection(grid.East)}
-				canMove, positions := canBoxMove(warehouseMap, direction, boxPositions, [][]grid.Point{})
-				if canMove {
-					if direction == grid.North {
-						slices.SortFunc(positions, sortYAscending)
-					} else {
-						slices.SortFunc(positions, sortYDescending)
-					}
-					for _, box := range positions {
-						warehouseMap.SetPoint(box[0].GetNextPointInDirection(direction), "[")
-						warehouseMap.SetPoint(box[1].GetNextPointInDirection(direction), "]")
-						warehouseMap.SetPoint(box[0], ".")
-						warehouseMap.SetPoint(box[1], ".")
-					}
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction), "@")
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.East), ".")
-					warehouseMap.SetPoint(robotPosition, ".")
-				}
+				canMove, positions = canBoxMove(warehouseMap, direction, []grid.Point{nextPosition, nextPosition.GetNextPointInDirection(grid.East)}, [][]grid.Point{})
+			} else if warehouseMap.GetPoint(nextPosition) == "]" {
+				canMove, positions = canBoxMove(warehouseMap, direction, []grid.Point{nextPosition.GetNextPointInDirection(grid.West), nextPosition}, [][]grid.Point{})
 			}
 
-			if warehouseMap.GetPoint(nextPosition) == "]" {
-				boxPositions := []grid.Point{nextPosition.GetNextPointInDirection(grid.West), nextPosition}
-				canMove, positions := canBoxMove(warehouseMap, direction, boxPositions, [][]grid.Point{})
-				if canMove {
-					if direction == grid.North {
-						slices.SortFunc(positions, sortYAscending)
-					} else {
-						slices.SortFunc(positions, sortYDescending)
-					}
-
-					for _, box := range positions {
-						warehouseMap.SetPoint(box[0].GetNextPointInDirection(direction), "[")
-						warehouseMap.SetPoint(box[1].GetNextPointInDirection(direction), "]")
-						warehouseMap.SetPoint(box[0], ".")
-						warehouseMap.SetPoint(box[1], ".")
-					}
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction), "@")
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.West), ".")
-					warehouseMap.SetPoint(robotPosition, ".")
+			if canMove {
+				if direction == grid.North {
+					slices.SortFunc(positions, sortYAscending)
+				} else {
+					slices.SortFunc(positions, sortYDescending)
 				}
+				for _, box := range positions {
+					warehouseMap.SetPoint(box[0].GetNextPointInDirection(direction), "[")
+					warehouseMap.SetPoint(box[1].GetNextPointInDirection(direction), "]")
+					warehouseMap.SetPoint(box[0], ".")
+					warehouseMap.SetPoint(box[1], ".")
+				}
+				warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction), "@")
+
+				if warehouseMap.GetPoint(nextPosition) == "[" {
+					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.East), ".")
+				} else if warehouseMap.GetPoint(nextPosition) == "]" {
+					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.West), ".")
+				}
+
+				warehouseMap.SetPoint(robotPosition, ".")
 			}
 		} else {
 			// Find the next point that is not a box
