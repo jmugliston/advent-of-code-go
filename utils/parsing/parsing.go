@@ -19,6 +19,16 @@ func ReadNumbers(input string) []int {
 	return numbers
 }
 
+func ReadCharacters(input string) []string {
+	var characters []string
+
+	for _, char := range input {
+		characters = append(characters, string(char))
+	}
+
+	return characters
+}
+
 func ReadDigits(input string) []int {
 	var digits []int
 

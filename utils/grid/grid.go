@@ -94,6 +94,20 @@ func ParseNumbers(input string) NumberGrid {
 	return output
 }
 
+func ParseDirection(input string) Direction {
+	switch input {
+	case "^":
+		return North
+	case ">":
+		return East
+	case "v":
+		return South
+	case "<":
+		return West
+	}
+	panic("Invalid direction")
+}
+
 func SurroundingPoints(p Point) DirectionalPoints {
 	return DirectionalPoints{
 		North:     Point{X: p.X, Y: p.Y - 1},
@@ -150,6 +164,28 @@ func GetNextNPointsInDirection(p PointWithDirection, n int) []Point {
 		points = append(points, next)
 	}
 	return points
+}
+
+func GetOppositeDirection(direction Direction) Direction {
+	switch direction {
+	case North:
+		return South
+	case NorthEast:
+		return SouthWest
+	case East:
+		return West
+	case SouthEast:
+		return NorthWest
+	case South:
+		return North
+	case SouthWest:
+		return NorthEast
+	case West:
+		return East
+	case NorthWest:
+		return SouthEast
+	}
+	panic("Invalid direction")
 }
 
 func ManhattenDistance(p1 Point, p2 Point) int {
