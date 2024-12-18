@@ -59,7 +59,7 @@ func FindNumberOfSteps(plotGrid grid.StringGrid, startPosition grid.Point, maxSt
 			stepMap[grid.Point{X: next.Point.X, Y: next.Point.Y}] = next.Steps
 		}
 
-		nextPoints := grid.SurroundingPoints(next.Point)
+		nextPoints := grid.Neighbours(next.Point)
 
 		for _, point := range []grid.Point{nextPoints.North, nextPoints.East, nextPoints.South, nextPoints.West} {
 			if !plotGrid.IsPointInGrid(point) {

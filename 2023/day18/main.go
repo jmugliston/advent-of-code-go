@@ -52,7 +52,7 @@ func getPerimiterPoints(instructions []Instruction) []grid.Point {
 	currentPoint := grid.Point{X: 0, Y: 0}
 	for _, i := range instructions {
 		for j := 0; j < i.Amount; j++ {
-			currentPoint = grid.GetNextPointInDirection(grid.PointWithDirection{X: currentPoint.X, Y: currentPoint.Y, Direction: i.Direction})
+			currentPoint = currentPoint.AddDirection(i.Direction).NextPoint()
 			perimiterPoints = append(perimiterPoints, currentPoint)
 		}
 	}

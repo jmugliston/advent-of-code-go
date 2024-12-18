@@ -89,7 +89,7 @@ func ShortestPath(memoryMap grid.StringGrid, start grid.Point, end grid.Point) [
 
 		for _, direction := range []grid.Direction{grid.North, grid.East, grid.South, grid.West} {
 
-			nextPoint := current.Point.GetNextPointInDirection(direction)
+			nextPoint := current.Point.NextPoint(direction)
 
 			if memoryMap.GetPoint(nextPoint) != "." {
 				continue

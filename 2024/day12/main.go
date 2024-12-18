@@ -47,7 +47,7 @@ type Region struct {
 func getTileEdges(tile grid.Point, regionMap grid.StringGrid) int {
 	edges := 0
 
-	points := grid.SurroundingPoints(tile)
+	points := tile.Neighbours()
 
 	for _, point := range []grid.Point{points.North, points.East, points.South, points.West} {
 		if regionMap.IsPointInGrid(point) {
@@ -65,7 +65,7 @@ func getTileEdges(tile grid.Point, regionMap grid.StringGrid) int {
 func getTileCorners(tile grid.Point, regionMap grid.StringGrid) int {
 	region := regionMap.GetPoint(tile)
 
-	adjacentPoints := grid.SurroundingPoints(tile)
+	adjacentPoints := tile.Neighbours()
 
 	n := regionMap.GetPoint(adjacentPoints.North)
 	ne := regionMap.GetPoint(adjacentPoints.NorthEast)
@@ -185,7 +185,7 @@ func getRegion(startPoint grid.Point, regionMap grid.StringGrid) Region {
 		region.Edges += getTileEdges(current, regionMap)
 		region.Corners += getTileCorners(current, regionMap)
 
-		points := grid.SurroundingPoints(current)
+		points := current.Neighbours()
 
 		for _, point := range []grid.Point{points.North, points.East, points.South, points.West} {
 			if regionMap.IsPointInGrid(point) && !visited[point] && regionMap[point.Y][point.X] == region.Name {

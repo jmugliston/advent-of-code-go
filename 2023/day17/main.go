@@ -122,7 +122,7 @@ func findPath(heatLossMap grid.NumberGrid, start grid.Point, end grid.Point, min
 	DirectionLoop:
 		for _, direction := range []grid.Direction{grid.North, grid.East, grid.South, grid.West} {
 
-			nextStep := grid.GetNextPointInDirection(grid.PointWithDirection{X: currentStep.X, Y: currentStep.Y, Direction: direction})
+			nextStep := currentStep.ChangeDirection(direction).NextPoint()
 			nextCount := currentCount
 
 			if !heatLossMap.IsPointInGrid(nextStep) {

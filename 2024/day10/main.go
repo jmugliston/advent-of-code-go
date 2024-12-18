@@ -63,7 +63,7 @@ func findPaths(topographicMap grid.NumberGrid, startPositions []grid.Point, incl
 			// Remove the first element from the queue
 			queue = queue[1:]
 
-			nextPositions := grid.SurroundingPoints(currentPoint)
+			nextPositions := currentPoint.Neighbours()
 
 			for _, nextPos := range []grid.Point{
 				nextPositions.North,

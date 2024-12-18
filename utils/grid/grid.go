@@ -130,7 +130,7 @@ func ParseDirection(input string) Direction {
 	panic("Invalid direction")
 }
 
-func SurroundingPoints(p Point) DirectionalPoints {
+func Neighbours(p Point) DirectionalPoints {
 	return DirectionalPoints{
 		North:     Point{X: p.X, Y: p.Y - 1},
 		NorthEast: Point{X: p.X + 1, Y: p.Y - 1},
@@ -143,15 +143,23 @@ func SurroundingPoints(p Point) DirectionalPoints {
 	}
 }
 
-func (p Point) SurroundingPoints() DirectionalPoints {
-	return SurroundingPoints(p)
+func (p Point) Neighbours() DirectionalPoints {
+	return Neighbours(p)
+}
+
+func (p Point) AddDirection(d Direction) PointWithDirection {
+	return PointWithDirection{X: p.X, Y: p.Y, Direction: d}
 }
 
 func (d Direction) TurnRight90() Direction {
 	return Directions[(d.EnumIndex()+2)%8]
 }
 
-func GetNextPointInDirection(p PointWithDirection) Point {
+func (p PointWithDirection) ChangeDirection(d Direction) PointWithDirection {
+	return PointWithDirection{X: p.X, Y: p.Y, Direction: d}
+}
+
+func NextPoint(p PointWithDirection) Point {
 	switch p.Direction {
 	case North:
 		return Point{X: p.X, Y: p.Y - 1}
@@ -174,22 +182,34 @@ func GetNextPointInDirection(p PointWithDirection) Point {
 	}
 }
 
-func (p Point) GetNextPointInDirection(d Direction) Point {
-	return GetNextPointInDirection(PointWithDirection{X: p.X, Y: p.Y, Direction: d})
-}
-
-func GetNextNPointsInDirection(p PointWithDirection, n int) []Point {
+func NextPoints(p PointWithDirection, n int) []Point {
 	var points []Point
 	next := Point{X: p.X, Y: p.Y}
 	for i := 0; i < n; i++ {
-		next = GetNextPointInDirection(PointWithDirection{X: next.X, Y: next.Y, Direction: p.Direction})
+		next = NextPoint(PointWithDirection{X: next.X, Y: next.Y, Direction: p.Direction})
 		points = append(points, next)
 	}
 	return points
 }
 
-func GetOppositeDirection(direction Direction) Direction {
-	switch direction {
+func (p Point) NextPoint(d Direction) Point {
+	return NextPoint(PointWithDirection{X: p.X, Y: p.Y, Direction: d})
+}
+
+func (p PointWithDirection) NextPoint() Point {
+	return NextPoint(p)
+}
+
+func (p Point) NextPoints(d Direction, n int) []Point {
+	return NextPoints(PointWithDirection{X: p.X, Y: p.Y, Direction: d}, n)
+}
+
+func (p PointWithDirection) NextPoints(n int) []Point {
+	return NextPoints(p, n)
+}
+
+func (d Direction) Opposite() Direction {
+	switch d {
 	case North:
 		return South
 	case NorthEast:

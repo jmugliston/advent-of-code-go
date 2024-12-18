@@ -48,7 +48,7 @@ func simulateGuard(guardMap grid.StringGrid, startPosition grid.Point, obstacle 
 
 	for {
 		nextDirection := guardPosition.Direction
-		nextPosition := grid.GetNextPointInDirection(guardPosition)
+		nextPosition := grid.NextPoint(guardPosition)
 
 		if guardMap.GetPoint(nextPosition) == "#" || nextPosition == obstacle {
 			// Guard hit something - turn right!

@@ -92,7 +92,7 @@ func robotMove(
 	direction grid.Direction) *grid.StringGrid {
 
 	robotPosition := warehouseMap.Find("@")
-	nextPosition := robotPosition.GetNextPointInDirection(direction)
+	nextPosition := robotPosition.NextPoint(direction)
 
 	for {
 		if warehouseMap.GetPoint(nextPosition) == "#" {
@@ -105,7 +105,7 @@ func robotMove(
 		} else {
 			nextBoxPosition := nextPosition
 			for {
-				nextBoxPosition = nextBoxPosition.GetNextPointInDirection(direction)
+				nextBoxPosition = nextBoxPosition.NextPoint(direction)
 				if warehouseMap.GetPoint(nextBoxPosition) == "#" {
 					break
 				}
@@ -127,8 +127,8 @@ func robotMove(
 
 // Detect if a scaled box can move North / South
 func canBoxMoveNorthSouth(warehouseMap *grid.StringGrid, direction grid.Direction, boxPositions []grid.Point, allBoxPositions [][]grid.Point) (bool, [][]grid.Point) {
-	leftPosition := boxPositions[0].GetNextPointInDirection(direction)
-	rightPosition := boxPositions[1].GetNextPointInDirection(direction)
+	leftPosition := boxPositions[0].NextPoint(direction)
+	rightPosition := boxPositions[1].NextPoint(direction)
 
 	left := warehouseMap.GetPoint(leftPosition)
 	right := warehouseMap.GetPoint(rightPosition)
@@ -145,14 +145,14 @@ func canBoxMoveNorthSouth(warehouseMap *grid.StringGrid, direction grid.Directio
 
 	switch {
 	case left == "." && right == "[":
-		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.GetNextPointInDirection(grid.East)}, allBoxPositions)
+		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.NextPoint(grid.East)}, allBoxPositions)
 	case left == "]" && right == ".":
-		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.GetNextPointInDirection(grid.West), leftPosition}, allBoxPositions)
+		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.NextPoint(grid.West), leftPosition}, allBoxPositions)
 	case left == "[" && right == "]":
 		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition, rightPosition}, allBoxPositions)
 	case left == "]" && right == "[":
-		rCanMove, rBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.GetNextPointInDirection(grid.East)}, [][]grid.Point{})
-		lCanMove, lBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.GetNextPointInDirection(grid.West), leftPosition}, [][]grid.Point{})
+		rCanMove, rBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.NextPoint(grid.East)}, [][]grid.Point{})
+		lCanMove, lBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.NextPoint(grid.West), leftPosition}, [][]grid.Point{})
 		if lCanMove && rCanMove {
 			return true, append(allBoxPositions, append(lBoxes, rBoxes...)...)
 		}
@@ -164,7 +164,7 @@ func canBoxMoveNorthSouth(warehouseMap *grid.StringGrid, direction grid.Directio
 // This is horrible code but it works...
 func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *grid.StringGrid {
 	robotPosition := warehouseMap.Find("@")
-	nextPosition := robotPosition.GetNextPointInDirection(direction)
+	nextPosition := robotPosition.NextPoint(direction)
 	next := warehouseMap.GetPoint(nextPosition)
 
 	if next == "#" {
@@ -184,9 +184,9 @@ func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *g
 			var box []grid.Point
 
 			if next == "[" {
-				box = []grid.Point{nextPosition, nextPosition.GetNextPointInDirection(grid.East)}
+				box = []grid.Point{nextPosition, nextPosition.NextPoint(grid.East)}
 			} else if next == "]" {
-				box = []grid.Point{nextPosition.GetNextPointInDirection(grid.West), nextPosition}
+				box = []grid.Point{nextPosition.NextPoint(grid.West), nextPosition}
 			}
 
 			canMove, positions = canBoxMoveNorthSouth(warehouseMap, direction, box, [][]grid.Point{})
@@ -200,8 +200,8 @@ func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *g
 				})
 
 				for _, box := range positions {
-					warehouseMap.SetPoint(box[0].GetNextPointInDirection(direction), "[")
-					warehouseMap.SetPoint(box[1].GetNextPointInDirection(direction), "]")
+					warehouseMap.SetPoint(box[0].NextPoint(direction), "[")
+					warehouseMap.SetPoint(box[1].NextPoint(direction), "]")
 					warehouseMap.SetPoint(box[0], ".")
 					warehouseMap.SetPoint(box[1], ".")
 				}
@@ -212,7 +212,7 @@ func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *g
 		} else {
 			// Find the next point that is not a box
 			count := 1
-			nextPoint := nextPosition.GetNextPointInDirection(direction)
+			nextPoint := nextPosition.NextPoint(direction)
 			for {
 				if warehouseMap.GetPoint(nextPoint) == "#" {
 					break
@@ -221,8 +221,8 @@ func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *g
 					// Work backwards and move the boxes along 1 space
 					previousPoint := nextPoint
 					for count > 0 {
-						warehouseMap.SetPoint(previousPoint, warehouseMap.GetPoint(previousPoint.GetNextPointInDirection(grid.GetOppositeDirection(direction))))
-						previousPoint = previousPoint.GetNextPointInDirection(grid.GetOppositeDirection(direction))
+						warehouseMap.SetPoint(previousPoint, warehouseMap.GetPoint(previousPoint.NextPoint(direction.Opposite())))
+						previousPoint = previousPoint.NextPoint(direction.Opposite())
 						count -= 1
 					}
 					warehouseMap.SetPoint(previousPoint, "@")
@@ -230,7 +230,7 @@ func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *g
 					break
 				}
 				count += 1
-				nextPoint = nextPoint.GetNextPointInDirection(direction)
+				nextPoint = nextPoint.NextPoint(direction)
 			}
 		}
 	}

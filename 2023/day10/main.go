@@ -99,7 +99,7 @@ func getSteps(maze [][]string, start grid.Point) []grid.Point {
 	steps := []grid.Point{start}
 
 	for {
-		nextPoints := grid.SurroundingPoints(current)
+		nextPoints := grid.Neighbours(current)
 
 		if isValidMove(maze, previous, current, nextPoints.North, grid.North) {
 			previous = current

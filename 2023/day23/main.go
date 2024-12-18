@@ -41,7 +41,7 @@ func main() {
 func isJunction(hikeMap grid.StringGrid, point grid.Point) bool {
 	pathCount := 0
 
-	points := grid.SurroundingPoints(point)
+	points := grid.Neighbours(point)
 	for _, point := range []grid.Point{
 		points.North,
 		points.East,
@@ -116,7 +116,7 @@ func getAdjacentJunctions(hikeMap grid.StringGrid, junctions []grid.Point, start
 		nextSteps := item.steps + 1
 		nextRoute := append(item.route, item.point)
 
-		points := grid.SurroundingPoints(item.point)
+		points := item.point.Neighbours()
 
 		for direction, point := range []grid.Point{
 			points.North,

@@ -98,7 +98,7 @@ func RunAlgortihm(maze grid.StringGrid, start grid.PointWithDirection, end grid.
 
 		// Check if we can move in any direction
 		for _, direction := range []grid.Direction{grid.North, grid.East, grid.South, grid.West} {
-			nextPosition := grid.GetNextPointInDirection(grid.PointWithDirection{X: current.Position.X, Y: current.Position.Y, Direction: direction})
+			nextPosition := current.Position.ChangeDirection(direction).NextPoint()
 
 			if maze.GetPoint(nextPosition) == "#" {
 				continue

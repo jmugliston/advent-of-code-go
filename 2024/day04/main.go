@@ -44,7 +44,7 @@ func Part1(input string) int {
 	total := 0
 	for _, point := range wordsearch.FindAll("X") {
 		for _, direction := range grid.Directions {
-			nextNPoints := grid.GetNextNPointsInDirection(grid.PointWithDirection{X: point.X, Y: point.Y, Direction: direction}, 3)
+			nextNPoints := grid.NextPoints(point.AddDirection(direction), 3)
 			wordPoints := append([]grid.Point{point}, nextNPoints...)
 			word := strings.Join(wordsearch.GetPoints(wordPoints)[:], "")
 			if word == "XMAS" {
@@ -61,7 +61,7 @@ func Part2(input string) int {
 
 	total := 0
 	for _, point := range wordsearch.FindAll("A") {
-		points := point.SurroundingPoints()
+		points := point.Neighbours()
 
 		nw := wordsearch.GetPoint(points.NorthWest)
 		se := wordsearch.GetPoint(points.SouthEast)

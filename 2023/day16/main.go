@@ -42,16 +42,16 @@ func getNextSteps(floorMap grid.StringGrid, currentPointWithDirection grid.Point
 
 	nextSteps := []grid.PointWithDirection{}
 
-	nextpoint := grid.GetNextPointInDirection(currentPointWithDirection)
+	next := currentPointWithDirection.NextPoint()
 
-	if floorMap.IsPointInGrid(nextpoint) {
+	if floorMap.IsPointInGrid(next) {
 		// Empty space
-		if floorMap[nextpoint.Y][nextpoint.X] == "." {
-			nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: currentPointWithDirection.Direction})
+		if floorMap[next.Y][next.X] == "." {
+			nextSteps = append(nextSteps, next.AddDirection(currentPointWithDirection.Direction))
 		}
 
 		// Mirror
-		if floorMap[nextpoint.Y][nextpoint.X] == "/" {
+		if floorMap[next.Y][next.X] == "/" {
 			var turnedDirection grid.Direction
 
 			switch currentPointWithDirection.Direction {
@@ -65,11 +65,11 @@ func getNextSteps(floorMap grid.StringGrid, currentPointWithDirection grid.Point
 				turnedDirection = grid.South
 			}
 
-			nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: turnedDirection})
+			nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: turnedDirection})
 		}
 
 		// Mirror
-		if floorMap[nextpoint.Y][nextpoint.X] == "\\" {
+		if floorMap[next.Y][next.X] == "\\" {
 			var turnedDirection grid.Direction
 
 			switch currentPointWithDirection.Direction {
@@ -83,29 +83,29 @@ func getNextSteps(floorMap grid.StringGrid, currentPointWithDirection grid.Point
 				turnedDirection = grid.North
 			}
 
-			nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: turnedDirection})
+			nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: turnedDirection})
 		}
 
 		// Splitters
-		if floorMap[nextpoint.Y][nextpoint.X] == "|" {
+		if floorMap[next.Y][next.X] == "|" {
 			// Did we come from East/West?
 			if currentPointWithDirection.Direction == grid.East || currentPointWithDirection.Direction == grid.West {
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: grid.North})
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: grid.South})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: grid.North})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: grid.South})
 			} else {
 				// Otherwise carry on
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: currentPointWithDirection.Direction})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: currentPointWithDirection.Direction})
 			}
 		}
 
-		if floorMap[nextpoint.Y][nextpoint.X] == "-" {
+		if floorMap[next.Y][next.X] == "-" {
 			// Did we come from North/South?
 			if currentPointWithDirection.Direction == grid.North || currentPointWithDirection.Direction == grid.South {
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: grid.East})
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: grid.West})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: grid.East})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: grid.West})
 			} else {
 				// Otherwise carry on
-				nextSteps = append(nextSteps, grid.PointWithDirection{X: nextpoint.X, Y: nextpoint.Y, Direction: currentPointWithDirection.Direction})
+				nextSteps = append(nextSteps, grid.PointWithDirection{X: next.X, Y: next.Y, Direction: currentPointWithDirection.Direction})
 			}
 		}
 	}
