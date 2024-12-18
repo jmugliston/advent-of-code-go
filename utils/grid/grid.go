@@ -94,6 +94,28 @@ func ParseNumbers(input string) NumberGrid {
 	return output
 }
 
+func InitialiseStringGrid(width int, height int, fill string) StringGrid {
+	grid := make(StringGrid, height)
+	for i := range grid {
+		grid[i] = make([]string, width)
+		for j := range grid[i] {
+			grid[i][j] = fill
+		}
+	}
+	return grid
+}
+
+func InitialiseNumberGrid(width int, height int, fill int) NumberGrid {
+	grid := make(NumberGrid, height)
+	for i := range grid {
+		grid[i] = make([]int, width)
+		for j := range grid[i] {
+			grid[i][j] = fill
+		}
+	}
+	return grid
+}
+
 func ParseDirection(input string) Direction {
 	switch input {
 	case "^":
