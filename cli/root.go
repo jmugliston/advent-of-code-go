@@ -136,7 +136,14 @@ var solveCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		SolveDay(fmt.Sprint(year), fmt.Sprint(day), fmt.Sprint(part))
+		example, err := cmd.Flags().GetBool("example")
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		SolveDay(fmt.Sprint(year), fmt.Sprint(day), fmt.Sprint(part), example)
 	},
 }
 
@@ -237,6 +244,7 @@ func init() {
 	solveCmd.Flags().IntP("year", "y", defaultYear, "puzzle year")
 	solveCmd.Flags().IntP("day", "d", defaultDay, "puzzle day")
 	solveCmd.Flags().IntP("part", "p", 1, "puzzle part")
+	solveCmd.Flags().BoolP("example", "e", false, "use example input")
 	solveCmd.MarkFlagRequired("day")
 
 	submitCmd.Flags().IntP("year", "y", defaultYear, "puzzle year")

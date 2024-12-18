@@ -13,14 +13,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -206,8 +210,11 @@ func solve(n int, d int, program []int) int {
 		return n
 	}
 
+	// Work backwards through the digits to solve
+
+	// Check each 3 bit value (numbers 0-7) because the program output uses mod 8
 	for i := 0; i < 8; i++ {
-		// Digit changes every 8^n iterations, where n is the index of the digit in the program
+		// Digit changes every 8^d iterations, where d is the index of the digit in the program
 		nn := n + i*int(math.Pow(8, float64(d)))
 
 		registers := make(map[string]int)
@@ -221,6 +228,7 @@ func solve(n int, d int, program []int) int {
 		}
 
 		if outputs[d] == program[d] {
+			// Partial match - continue to next digit
 			res = append(res, solve(nn, d-1, program))
 		}
 	}

@@ -14,14 +14,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -88,8 +92,8 @@ func robotMove(
 	direction grid.Direction) *grid.StringGrid {
 
 	robotPosition := warehouseMap.Find("@")
-
 	nextPosition := robotPosition.GetNextPointInDirection(direction)
+
 	for {
 		if warehouseMap.GetPoint(nextPosition) == "#" {
 			break
@@ -121,118 +125,88 @@ func robotMove(
 	return warehouseMap
 }
 
-func canBoxMove(warehouseMap *grid.StringGrid, direction grid.Direction, boxPositions []grid.Point, allboxPositions [][]grid.Point) (bool, [][]grid.Point) {
-	a := boxPositions[0].GetNextPointInDirection(direction)
-	b := boxPositions[1].GetNextPointInDirection(direction)
+// Detect if a scaled box can move North / South
+func canBoxMoveNorthSouth(warehouseMap *grid.StringGrid, direction grid.Direction, boxPositions []grid.Point, allBoxPositions [][]grid.Point) (bool, [][]grid.Point) {
+	leftPosition := boxPositions[0].GetNextPointInDirection(direction)
+	rightPosition := boxPositions[1].GetNextPointInDirection(direction)
 
-	aValue := warehouseMap.GetPoint(a)
-	bValue := warehouseMap.GetPoint(b)
+	left := warehouseMap.GetPoint(leftPosition)
+	right := warehouseMap.GetPoint(rightPosition)
 
-	if aValue == "#" || bValue == "#" {
-		return false, allboxPositions
+	if left == "#" || right == "#" {
+		return false, allBoxPositions
 	}
 
-	if aValue == "." && bValue == "." {
-		return true, append(allboxPositions, []grid.Point{boxPositions[0], boxPositions[1]})
+	if left == "." && right == "." {
+		return true, append(allBoxPositions, boxPositions)
 	}
 
-	allboxPositions = append(allboxPositions, []grid.Point{boxPositions[0], boxPositions[1]})
+	allBoxPositions = append(allBoxPositions, boxPositions)
 
-	if aValue == "." && bValue == "[" {
-		return canBoxMove(warehouseMap, direction, []grid.Point{b, b.GetNextPointInDirection(grid.East)}, allboxPositions)
-	}
-
-	if aValue == "]" && bValue == "." {
-		return canBoxMove(warehouseMap, direction, []grid.Point{a.GetNextPointInDirection(grid.West), a}, allboxPositions)
-	}
-
-	if aValue == "[" && bValue == "]" {
-		return canBoxMove(warehouseMap, direction, []grid.Point{a, b}, allboxPositions)
-	}
-
-	if aValue == "]" && bValue == "[" {
-		rCanMove, rBoxes := canBoxMove(warehouseMap, direction, []grid.Point{b, b.GetNextPointInDirection(grid.East)}, [][]grid.Point{})
-		lCanMove, lBoxes := canBoxMove(warehouseMap, direction, []grid.Point{a.GetNextPointInDirection(grid.West), a}, [][]grid.Point{})
+	switch {
+	case left == "." && right == "[":
+		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.GetNextPointInDirection(grid.East)}, allBoxPositions)
+	case left == "]" && right == ".":
+		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.GetNextPointInDirection(grid.West), leftPosition}, allBoxPositions)
+	case left == "[" && right == "]":
+		return canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition, rightPosition}, allBoxPositions)
+	case left == "]" && right == "[":
+		rCanMove, rBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{rightPosition, rightPosition.GetNextPointInDirection(grid.East)}, [][]grid.Point{})
+		lCanMove, lBoxes := canBoxMoveNorthSouth(warehouseMap, direction, []grid.Point{leftPosition.GetNextPointInDirection(grid.West), leftPosition}, [][]grid.Point{})
 		if lCanMove && rCanMove {
-			return true, append(allboxPositions, append(lBoxes, rBoxes...)...)
+			return true, append(allBoxPositions, append(lBoxes, rBoxes...)...)
 		}
 	}
 
-	return false, allboxPositions
+	return false, allBoxPositions
 }
 
-func sortYAscending(a, b []grid.Point) int {
-	if a[0].Y < b[0].Y {
-		return -1
-	} else if a[0].Y > b[0].Y {
-		return 1
-	}
-	return 0
-}
-
-func sortYDescending(a, b []grid.Point) int {
-	if a[0].Y < b[0].Y {
-		return 1
-	} else if a[0].Y > b[0].Y {
-		return -1
-	}
-	return 0
-}
-
-func robotMoveScaled(
-	warehouseMap *grid.StringGrid,
-	direction grid.Direction) *grid.StringGrid {
-
+// This is horrible code but it works...
+func robotMoveScaled(warehouseMap *grid.StringGrid, direction grid.Direction) *grid.StringGrid {
 	robotPosition := warehouseMap.Find("@")
-
 	nextPosition := robotPosition.GetNextPointInDirection(direction)
+	next := warehouseMap.GetPoint(nextPosition)
 
-	if warehouseMap.GetPoint(nextPosition) == "#" {
-		// Do nothing
+	if next == "#" {
 		return warehouseMap
 	}
 
-	if warehouseMap.GetPoint(nextPosition) == "." {
-		// Just move into that space
+	if next == "." {
 		warehouseMap.SetPoint(nextPosition, "@")
 		warehouseMap.SetPoint(robotPosition, ".")
 		return warehouseMap
 	}
 
-	if warehouseMap.GetPoint(nextPosition) == "[" || warehouseMap.GetPoint(nextPosition) == "]" {
+	if next == "[" || next == "]" {
 		if direction == grid.North || direction == grid.South {
-			if warehouseMap.GetPoint(nextPosition) == "#" {
-				// Hit a wall - do nothing
-			}
-
 			var canMove bool
 			var positions [][]grid.Point
-			if warehouseMap.GetPoint(nextPosition) == "[" {
-				canMove, positions = canBoxMove(warehouseMap, direction, []grid.Point{nextPosition, nextPosition.GetNextPointInDirection(grid.East)}, [][]grid.Point{})
-			} else if warehouseMap.GetPoint(nextPosition) == "]" {
-				canMove, positions = canBoxMove(warehouseMap, direction, []grid.Point{nextPosition.GetNextPointInDirection(grid.West), nextPosition}, [][]grid.Point{})
+			var box []grid.Point
+
+			if next == "[" {
+				box = []grid.Point{nextPosition, nextPosition.GetNextPointInDirection(grid.East)}
+			} else if next == "]" {
+				box = []grid.Point{nextPosition.GetNextPointInDirection(grid.West), nextPosition}
 			}
 
+			canMove, positions = canBoxMoveNorthSouth(warehouseMap, direction, box, [][]grid.Point{})
+
 			if canMove {
-				if direction == grid.North {
-					slices.SortFunc(positions, sortYAscending)
-				} else {
-					slices.SortFunc(positions, sortYDescending)
-				}
+				slices.SortFunc(positions, func(a, b []grid.Point) int {
+					if direction == grid.North {
+						return a[0].Y - b[0].Y
+					}
+					return b[0].Y - a[0].Y
+				})
+
 				for _, box := range positions {
 					warehouseMap.SetPoint(box[0].GetNextPointInDirection(direction), "[")
 					warehouseMap.SetPoint(box[1].GetNextPointInDirection(direction), "]")
 					warehouseMap.SetPoint(box[0], ".")
 					warehouseMap.SetPoint(box[1], ".")
 				}
-				warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction), "@")
 
-				if warehouseMap.GetPoint(nextPosition) == "[" {
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.East), ".")
-				} else if warehouseMap.GetPoint(nextPosition) == "]" {
-					warehouseMap.SetPoint(robotPosition.GetNextPointInDirection(direction).GetNextPointInDirection(grid.West), ".")
-				}
-
+				warehouseMap.SetPoint(nextPosition, "@")
 				warehouseMap.SetPoint(robotPosition, ".")
 			}
 		} else {
@@ -241,7 +215,6 @@ func robotMoveScaled(
 			nextPoint := nextPosition.GetNextPointInDirection(direction)
 			for {
 				if warehouseMap.GetPoint(nextPoint) == "#" {
-					// Hit a wall - do nothing
 					break
 				}
 				if warehouseMap.GetPoint(nextPoint) == "." {
@@ -290,6 +263,7 @@ func Part2(input string) int {
 	}
 
 	boxLocations := warehouseMap.FindAll("[")
+
 	result := 0
 	for _, box := range boxLocations {
 		result += box.X + (box.Y * 100)

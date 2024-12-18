@@ -17,14 +17,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -33,7 +37,7 @@ func main() {
 	}
 
 	if *partFlag == "1" {
-		fmt.Println(Part1(string(input), 200000000000000, 400000000000000))
+		fmt.Println(Part1(string(input), *exampleFlag))
 	} else {
 		fmt.Println(Part2(string(input)))
 	}
@@ -124,7 +128,14 @@ func xyWithinRange(x float64, y float64, min float64, max float64) bool {
 	return x >= min && x <= max && y >= min && y <= max
 }
 
-func Part1(input string, minBound int, maxBound int) int {
+func Part1(input string, example bool) int {
+	minBound := 200000000000000
+	maxBound := 400000000000000
+
+	if example {
+		minBound = 7
+		maxBound = 27
+	}
 
 	lines := parsing.ReadLines(input)
 

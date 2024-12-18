@@ -87,7 +87,7 @@ func Interactive() {
 	}
 
 	if option == "Solve" {
-		SolveDay(year, day, part)
+		SolveDay(year, day, part, false)
 		return
 	}
 

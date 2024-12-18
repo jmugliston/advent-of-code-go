@@ -13,14 +13,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -34,6 +38,7 @@ func main() {
 		fmt.Println(Part2(string(input)))
 	}
 }
+
 func parseInput(input string) ([]string, map[string][]string) {
 
 	lines := strings.Split(strings.TrimSpace(input), "\n")

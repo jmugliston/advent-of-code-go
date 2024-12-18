@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,14 +12,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -39,7 +44,8 @@ type QueueItem struct {
 	Score    int
 }
 
-// Calculate the smallest number of clockwise/anti-clockwise turns to reach the target direction
+// Calculates the minimum number of 90-degree turns needed to
+// change direction from 'from' to 'to' on a grid.
 func shortestTurn(from grid.Direction, to grid.Direction) int {
 	turns := map[grid.Direction]int{
 		grid.North: 0,
@@ -65,7 +71,7 @@ func RunAlgortihm(maze grid.StringGrid, start grid.PointWithDirection, end grid.
 	// Map points visited to the number of steps taken to get there
 	visited := make(map[grid.PointWithDirection]int)
 
-	best := QueueItem{Score: 999999}
+	best := QueueItem{Score: math.MaxInt64}
 	pathMap := make(map[int][][]grid.PointWithDirection)
 
 	queue := []QueueItem{{Position: start, Path: []grid.PointWithDirection{start}, Score: 0}}
@@ -92,19 +98,18 @@ func RunAlgortihm(maze grid.StringGrid, start grid.PointWithDirection, end grid.
 
 		// Check if we can move in any direction
 		for _, direction := range []grid.Direction{grid.North, grid.East, grid.South, grid.West} {
-			newPosition := grid.GetNextPointInDirection(grid.PointWithDirection{X: current.Position.X, Y: current.Position.Y, Direction: direction})
+			nextPosition := grid.GetNextPointInDirection(grid.PointWithDirection{X: current.Position.X, Y: current.Position.Y, Direction: direction})
 
-			if maze.GetPoint(newPosition) == "#" {
-				// Hit a wall
+			if maze.GetPoint(nextPosition) == "#" {
 				continue
 			}
 
-			newPositionWithDirection := grid.PointWithDirection{X: newPosition.X, Y: newPosition.Y, Direction: direction}
+			nextPositionWithDirection := grid.PointWithDirection{X: nextPosition.X, Y: nextPosition.Y, Direction: direction}
 
-			// Make sure newPosition is not in the path we took
+			// Make sure the new position is not in the path we took
 			if len(current.Path) > 1 {
 				for _, step := range current.Path {
-					if step == newPositionWithDirection {
+					if step == nextPositionWithDirection {
 						continue
 					}
 				}
@@ -112,11 +117,11 @@ func RunAlgortihm(maze grid.StringGrid, start grid.PointWithDirection, end grid.
 
 			newPath := make([]grid.PointWithDirection, len(current.Path))
 			copy(newPath, current.Path)
-			newPath = append(newPath, newPositionWithDirection)
+			newPath = append(newPath, nextPositionWithDirection)
 
 			turns := shortestTurn(current.Position.Direction, direction)
 
-			queue = append(queue, QueueItem{Position: newPositionWithDirection, Path: newPath, Score: current.Score + 1 + (turns * 1000)})
+			queue = append(queue, QueueItem{Position: nextPositionWithDirection, Path: newPath, Score: current.Score + 1 + (turns * 1000)})
 		}
 	}
 

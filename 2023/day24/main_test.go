@@ -15,7 +15,7 @@ func TestPart1(t *testing.T) {
 
 	expected := 2
 
-	result := Part1(string(input), 7, 27)
+	result := Part1(string(input), true)
 
 	if result != expected {
 		t.Errorf("Expected %v, got %d", expected, result)

@@ -13,14 +13,18 @@ import (
 )
 
 var partFlag = flag.String("part", "1", "The part of the day to run (1 or 2)")
+var exampleFlag = flag.Bool("example", false, "Use the example instead of the puzzle input")
 
 func main() {
 	flag.Parse()
 
 	_, filename, _, _ := runtime.Caller(0)
-	dirname := filepath.Dir(filename)
 
-	path := filepath.Join(dirname, "input", "input.txt")
+	inputFile := "input.txt"
+	if *exampleFlag {
+		inputFile = "example.txt"
+	}
+	path := filepath.Join(filepath.Dir(filename), "input", inputFile)
 
 	input, err := os.ReadFile(path)
 
@@ -31,7 +35,7 @@ func main() {
 	if *partFlag == "1" {
 		fmt.Println(Part1(string(input)))
 	} else {
-		fmt.Println(Part2(string(input), 1000000))
+		fmt.Println(Part2(string(input), *exampleFlag))
 	}
 }
 
@@ -128,7 +132,12 @@ func Part1(input string) int {
 	return sum
 }
 
-func Part2(input string, scale int) int {
+func Part2(input string, example bool) int {
+	scale := 1000000
+	if example {
+		scale = 100
+	}
+
 	image := grid.Parse(input)
 
 	galaxies := getGalaxies(image)

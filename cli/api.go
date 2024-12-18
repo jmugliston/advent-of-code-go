@@ -200,11 +200,16 @@ func FetchInput(year string, day string, path string) {
 //   - year: The year of the Advent of Code puzzle.
 //   - day: The day of the Advent of Code puzzle.
 //   - part: The part of the Advent of Code puzzle (1 or 2).
+//   - example: A boolean indicating whether to solve the example puzzle.
 //
 // Returns:
 //   - string: The output of the Go program as a string.
-func SolveDay(year string, day string, part string) string {
-	logger.Info("Solving", "year", year, "day", day, "part", part)
+func SolveDay(year string, day string, part string, example bool) string {
+	if example {
+		logger.Info("Solving", "year", year, "day", day, "part", part, "example", true)
+	} else {
+		logger.Info("Solving", "year", year, "day", day, "part", part)
+	}
 
 	if len(day) == 1 {
 		day = "0" + day
@@ -219,7 +224,11 @@ func SolveDay(year string, day string, part string) string {
 		os.Exit(1)
 	}
 
-	out, err := exec.Command("go", "run", fmt.Sprintf("%s/main.go", path), "--part", part).Output()
+	cmdArgs := []string{"run", fmt.Sprintf("%s/main.go", path), "--part", part}
+	if example {
+		cmdArgs = append(cmdArgs, "--example")
+	}
+	out, err := exec.Command("go", cmdArgs...).Output()
 
 	if err != nil {
 		panic(err)
@@ -244,7 +253,7 @@ func SolveDay(year string, day string, part string) string {
 //
 //	SubmitAnswer("2021", "1", "1")
 func SubmitAnswer(year string, day string, part string) {
-	answer := strings.TrimSpace(SolveDay(year, day, part))
+	answer := strings.TrimSpace(SolveDay(year, day, part, false))
 
 	url := fmt.Sprintf("%s/%s/day/%s/answer", BASE_URL, year, day)
 
