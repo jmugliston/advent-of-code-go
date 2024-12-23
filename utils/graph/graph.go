@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jmugliston/aoc/utils"
 )
@@ -20,6 +21,25 @@ type Edge struct {
 	Source string
 	Target string
 	Data   []string
+}
+
+func (g *Graph) ToString() string {
+	var output strings.Builder
+	// Print each node and it's edges
+	for _, node := range g.Nodes {
+		output.WriteString(fmt.Sprintf("%s: ", node.Name))
+		edges := utils.Filter(g.Edges, func(edge *Edge) bool {
+			return edge.Source == node.Name
+		})
+		for i, edge := range edges {
+			output.WriteString(fmt.Sprintf("%s-%s", edge.Source, edge.Target))
+			if i < len(edges)-1 {
+				output.WriteString(", ")
+			}
+		}
+		output.WriteString("\n")
+	}
+	return output.String()
 }
 
 func (g *Graph) Clone() Graph {
