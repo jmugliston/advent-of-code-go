@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -47,6 +48,7 @@ type QueueItem struct {
 	Keys  []string
 }
 
+// BFS to find the shortest path between two keys on the keypad
 func shortestPaths(pad grid.StringGrid, start string, end string) [][]string {
 	startPoint := pad.Find(start)
 	endPoint := pad.Find(end)
@@ -65,7 +67,7 @@ func shortestPaths(pad grid.StringGrid, start string, end string) [][]string {
 		if current.Point == endPoint {
 			if len(current.Keys) <= best {
 				best = len(current.Keys)
-				paths = append(paths, append(current.Keys, "A"))
+				paths = append(paths, current.Keys)
 			}
 			continue
 		}
@@ -122,46 +124,8 @@ func shortestPaths(pad grid.StringGrid, start string, end string) [][]string {
 	return finalPaths
 }
 
-func getSequences(sequence []string, level int, lookups map[string][][]string, cache map[string][][]string) [][]string {
-	cacheKey := strings.Join(sequence, "") + strconv.Itoa(level)
-	if cached, ok := cache[cacheKey]; ok {
-		return cached
-	}
-
-	var nextSequences [][]string
-	lastKey := "A"
-	for _, key := range sequence {
-		sPaths := lookups[lastKey+key]
-		if len(nextSequences) == 0 {
-			nextSequences = append(nextSequences, sPaths...)
-		} else {
-			var newSequences [][]string
-			for _, seq := range nextSequences {
-				for _, sPath := range sPaths {
-					newSequences = append(newSequences, append(seq, sPath...))
-				}
-			}
-			nextSequences = newSequences
-		}
-		lastKey = key
-	}
-
-	cache[cacheKey] = nextSequences
-
-	if level < 2 {
-		var next [][]string
-		for _, seq := range nextSequences {
-			next = append(next, getSequences(seq, level+1, lookups, cache)...)
-		}
-		cache[cacheKey] = next
-		return next
-	}
-
-	return nextSequences
-}
-
-func Part1(input string) int {
-	sequences := parsing.ReadLines(input)
+// Build a map of all the shortest paths between keys
+func buildKeyMap() map[string][][]string {
 
 	// 7 8 9
 	// 4 5 6
@@ -173,55 +137,145 @@ func Part1(input string) int {
 	// < v >
 	dirPad := grid.Parse(".^A\n<v>")
 
-	lookups := map[string][][]string{}
+	keyMap := map[string][][]string{}
 
 	numbers := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A"}
 	directions := []string{"^", "<", "v", ">", "A"}
 
-	// Pre-compute all the shortest paths between numbers
+	// Pre-compute all the shortest paths on the number pad
 	for _, numA := range numbers {
 		for _, numB := range numbers {
 			if numA == numB {
-				lookups[numA+numB] = [][]string{{"A"}}
+				keyMap[numA+numB] = [][]string{{"A"}}
 			}
-			lookups[numA+numB] = shortestPaths(numPad, numA, numB)
+			keyMap[numA+numB] = shortestPaths(numPad, numA, numB)
 		}
 	}
 
-	// Pre-compute all the shortest paths between directions
+	// Pre-compute all the shortest paths on the directional pad
 	for _, dirA := range directions {
 		for _, dirB := range directions {
 			if dirA == dirB {
-				lookups[dirA+dirB] = [][]string{{"A"}}
+				keyMap[dirA+dirB] = [][]string{{"A"}}
 			}
-			lookups[dirA+dirB] = shortestPaths(dirPad, dirA, dirB)
+			keyMap[dirA+dirB] = shortestPaths(dirPad, dirA, dirB)
 		}
 	}
+
+	return keyMap
+}
+
+// Build all possible sequences of keys
+func buildSequences(keys []string, index int, prevKey string, currPath []string, keyMap map[string][][]string) [][]string {
+	if index == len(keys) {
+		return [][]string{currPath}
+	}
+
+	var result [][]string
+	for _, path := range keyMap[prevKey+keys[index]] {
+		newPath := make([]string, len(currPath))
+
+		copy(newPath, currPath)
+
+		newPath = append(newPath, path...)
+		newPath = append(newPath, "A")
+
+		subResult := buildSequences(keys, index+1, keys[index], newPath, keyMap)
+		result = append(result, subResult...)
+	}
+
+	return result
+}
+
+// Find the shortest sequence of keys
+func shortestSequence(keys []string, depth int, cache map[string]int, keyMap map[string][][]string) int {
+	if depth == 0 {
+		return len(keys)
+	}
+
+	cacheKey := strings.Join(keys, "") + ":" + strconv.Itoa(depth)
+
+	if cached, ok := cache[cacheKey]; ok {
+		return cached
+	}
+
+	total := 0
+
+	for _, subKey := range strings.SplitAfter(strings.Join(keys, ""), "A") {
+		if subKey == "" {
+			continue
+		}
+
+		sequences := buildSequences(strings.Split(subKey, ""), 0, "A", []string{}, keyMap)
+
+		min := math.MaxInt64
+		for _, sequence := range sequences {
+			next := shortestSequence(sequence, depth-1, cache, keyMap)
+			if next < min {
+				min = next
+			}
+		}
+
+		total = total + min
+	}
+
+	cache[cacheKey] = total
+
+	return total
+}
+
+func Part1(input string) int {
+	sequences := parsing.ReadLines(input)
+
+	keyMap := buildKeyMap()
+
+	levels := 2
 
 	ans := 0
 	for _, sequence := range sequences {
-		cache := make(map[string][][]string, 0)
+		keys := strings.Split(sequence, "")
 
-		allSequences := getSequences(strings.Split(sequence, ""), 0, lookups, cache)
+		result := buildSequences(keys, 0, "A", []string{}, keyMap)
+		shortestSeqs := []int{}
 
-		minLen := math.MaxInt64
-		for _, sequence := range allSequences {
-			if len(sequence) < minLen {
-				minLen = len(sequence)
-			}
+		for _, seq := range result {
+			shortestSeqs = append(shortestSeqs, shortestSequence(seq, levels, make(map[string]int), keyMap))
 		}
 
-		num, _ := strconv.Atoi(sequence[:3])
-		ans = ans + (minLen * num)
+		minSeq := slices.Min(shortestSeqs)
 
-		fmt.Println(num, minLen, ans)
+		num, _ := strconv.Atoi(strings.Join(keys[:3], ""))
+
+		ans = ans + (num * minSeq)
 	}
 
-	// 176452
-	// not 176944
 	return ans
 }
 
 func Part2(input string) int {
-	return -1
+	sequences := parsing.ReadLines(input)
+
+	keyMap := buildKeyMap()
+
+	levels := 25
+
+	ans := 0
+	for _, sequence := range sequences {
+		keys := strings.Split(sequence, "")
+
+		result := buildSequences(keys, 0, "A", []string{}, keyMap)
+		shortestSeqs := []int{}
+
+		for _, seq := range result {
+			shortestSeqs = append(shortestSeqs, shortestSequence(seq, levels, make(map[string]int), keyMap))
+		}
+
+		minSeq := slices.Min(shortestSeqs)
+
+		num, _ := strconv.Atoi(strings.Join(keys[:3], ""))
+
+		ans = ans + (num * minSeq)
+	}
+
+	return ans
 }

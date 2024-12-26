@@ -31,7 +31,7 @@ func TestPart2(t *testing.T) {
 		panic("Couldn't find the example file!")
 	}
 
-	expected := -1
+	expected := 154115708116294
 
 	result := Part2(string(input))
 
